@@ -1,0 +1,15 @@
+
+
+# python
+*.py[cod]
+
+# Binary
+mode0/WAVECAR
+mode3/wave.b3
+mode3/wave.f3
+
+# scratch
+test.py
+
+# stdout/log files
+run.log
