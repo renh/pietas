@@ -5,8 +5,8 @@
 
 # Binary
 mode0/WAVECAR
-mode3/wave.b3
-mode3/wave.f3
+mode*/wave.*
+
 
 # scratch
 test.py

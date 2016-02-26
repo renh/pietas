@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -6,6 +5,7 @@
 from __future__ import print_function
 import numpy as np
 from constant import *
+import scipy.linalg
 #==============================================================================
 class WAVECAR:
     """
@@ -186,7 +186,7 @@ class WAVECAR:
             None
         '''
         irec = self.locateREC(ispin, ik)
-        self.fh.seek(self.__recl * irec)
+        self.__fh.seek(self.__recl * irec)
         dump = np.fromfile(self.__fh, dtype=float, count = 4+3*self.__nb)
         nplw = int(dump[0])
         kvec = np.array(dump[1:4])
@@ -323,7 +323,131 @@ class WAVECAR:
     #            if ibm != ibn:
     #                SKSp[ibn,ibm] = np.conj(SKSp[ibm,ibn])
     #    return SKSp
+
+class WaveFunction:
+    """
+    class WaveFunction.
+    describe the wavefunction (pseudo and all-electron) for specified spin and kpt indices.
+    usage: WaveFunction(WAVECAR, ispin, ik)
+    """
+    def __init__(self, WAVECAR, ispin = 0, ik = 0):
+        """
+        Initializer for class WaveFunction.
+        Args:
+            WAVECAR  : class WAVECAR, VASP WAVECAR reader
+            ispin    : spin index
+            ik       : kpt index
+        Returns:
+            None
+        Raises:
+            None
+        """
+        self.__WC = WAVECAR
+        self.__nb = self.__WC.getNBands()
+        self.__ispin = ispin
+        self.__ik = ik
+        self.__nplw, self.__kvec, self.__eig, self.__FermiW = self.readKHeader()
+        self.__wps = self.readWPS()
+
         
+    def getWPS(self): return self.__wps
+
+    def readKHeader(self):
+        kheader = self.__WC.readKHeader(self.__ik)
+        nplw, kvec, eig, FermiW = kheader
+        return nplw, np.array(kvec), np.array(eig), np.array(FermiW)
+    
+    def readWPS(self):
+        WC = self.__WC
+        nb = self.__nb
+        nplw = self.__nplw
+        wps = np.zeros([nb, nplw], dtype=np.complex128)
+        for ib in range(nb):
+            wps[ib] = WC.readBandCoeff(self.__ispin, self.__ik, ib)
+        return wps
+
+    def getOverlap(self):
+        nb = self.__nb
+        wps = self.__wps
+        S = np.dot(
+            np.conj(wps), wps.T
+        )
+        return S
+
+    def getWMatrix(self, tol):
+        """
+        Construct the occupation number diagonal matrix.
+            Small occupation numbers will be replaced by a small cutoff value tol, to bypass
+            possible numerical problems due to linear dependence.
+            see Szabo, "Modern Quantum Chemistry", Sec. 3.4.5 for details.
+        """
+        W = np.array([max(tol, x) for x in self.__FermiW])
+        return np.diag(W)
+
+    def getOrthMatrix(self, OccWeighted, tol):
+        """
+        Construct the unitary transform matrix to orthogonalize the pseudo wavefunction.
+            use Lowding's symmetric or occupation weighted orthogonalization scheme.
+            Lowding's:
+                   C = S^{-1/2}
+            Occupation weighted:
+                   C = W(WSW)^{-1/2}
+        Args:
+            OccWeighted   : logical (optional), occupation weighted?
+            tol           : float (optional), small value for occupation cutoff
+        Returns:
+            C    : ndarray (nb x nb), the unitary transform matrix.
+        """
+        S = self.getOverlap()
+        if OccWeighted:
+            W = self.getWMatrix(tol)
+            wsw = np.dot(W, np.dot(S, W)) # (WSW)
+            wsw = scipy.linalg.inv(wsw)   # (WSW)^{-1}
+            wsw = scipy.linalg.sqrtm(wsw) # (WSW)^{-1/2}
+            C = np.dot(W,wsw)
+        else:
+            C = scipy.linalg.inv(S)       # (S)^{-1}
+            C = scipy.linalg.sqrtm(s)     # (S)^{-1/2}
+
+        return C
+
+
+    def getWAE(self, OccWeighted = True, tol = 1.0E-3, check = True):
+        """
+        Orthgonalize the PS wavefunction, get the AE wavefunction.
+        Args:
+            OccWeighted : logical
+            tol         : float
+            check       : logical, check < WAE | WAE > == I
+        Returns:
+            w           : ndarray (nb x nplw), all-electron wavefunction
+        """
+        C = self.getOrthMatrix(OccWeighted = OccWeighted, tol = tol)
+        w = self.getWPS()
+        w = np.dot(w.T, C)
+        w = w.T
+        print('checking orthgonality...')
+
+        I = np.eye(len(w), dtype=np.complex128)
+        WW = np.dot(
+            np.conj(w), w.T
+        )
+        orth_success = np.allclose(WW, I)
+        if orth_success:
+            print("\nWavefunction orthogonalized.")
+            return w
+        else:
+            raise ValueError('Orthognalization failed.')
+        
+
+    
+            
+            
+        
+        
+        
+        
+     
         
 
 
@@ -353,8 +477,11 @@ if __name__ == '__main__':
         ngmax[0], ngmax[1], ngmax[2]
     ))
 
-    #
-    # orthonormalization for 
-    #
+    W = WaveFunction(Psi,0,0)
+    S = W.getOverlap()
+    print(S.shape)
+    wae = W.getWAE()
+    print(wae.shape)
+            
 
     print("\n\n")

@@ -39,11 +39,10 @@ if args.version:
     version.print_version_info()
     raise SystemExit
 
+# load input configuration
 if not args.input:
-    logging.critical(
-        " No configuration provided. Using '{} -i' or '-h' for more information.".format(
-            sys.argv[0]
-    ))
+    print(" No configuration provided. Using '{} -i' or '-h' for more information.".format(
+            sys.argv[0]))
     raise SystemExit
 else:
     try:
@@ -51,8 +50,9 @@ else:
             param = yaml.load(fh)
     except:
         raise IOError('can not load configuration file')
-
 #=================================================    
+
+
 
 
 
