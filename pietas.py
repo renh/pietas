@@ -11,7 +11,7 @@ import sys
 import wavefunction as wf
 import checker
 import grid
-
+import outcar
 
 #=================================================
 # parse arguments
@@ -179,6 +179,14 @@ print("\nReal space grid (for FFT): NGXF = {:d}, NGYF = {:d}, NGZF = {:d}".forma
 
 
 # parse OUTCAR for necessary parameters
+OUTCAR_file = param.get('outcar').get('equilibrium')
+print(OUTCAR_file)
+vaspOUTCAR = outcar.OUTCAR(OUTCAR_file)
+EFermi = vaspOUTCAR.getFermiEnergy()
+print("Fermi energy for equilibrium configuration: {:10.4f}".format(EFermi))
+kv, kw = vaspOUTCAR.getKSampling()
+print(kv)
+print(kw)
 
 #=================================================    
 # real calculation starts here
