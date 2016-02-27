@@ -56,7 +56,7 @@ else:
         raise IOError('can not load configuration file')
 #=================================================    
 
-print(param)
+#print(param)
 
 #
 # connect to WAVECAR files for the equilibrium and backward/forward displaced systems
@@ -138,7 +138,7 @@ else:
         raise IOError('can not load configuration file')
 #=================================================    
 
-print(param)
+#print(param)
 
 #
 # connect to WAVECAR files for the equilibrium and backward/forward displaced systems
@@ -176,25 +176,36 @@ NGR = grid.real_grid(rgd, a)
 print("\nReal space grid (for FFT): NGXF = {:d}, NGYF = {:d}, NGZF = {:d}".format(
     *NGR
 ))
+param['NGR'] = NGR
 
 
 # parse OUTCAR for necessary parameters
 OUTCAR_file = param.get('outcar').get('equilibrium')
-print(OUTCAR_file)
+#print(OUTCAR_file)
 vaspOUTCAR = outcar.OUTCAR(OUTCAR_file)
 EFermi = vaspOUTCAR.getFermiEnergy()
-print("Fermi energy for equilibrium configuration: {:10.4f}".format(EFermi))
-kv, kw = vaspOUTCAR.getKSampling()
-print(kv)
-print(kw)
+print("\nFermi energy for equilibrium configuration: {:10.4f}".format(EFermi))
+param['Fermi energy'] = EFermi
+kvec, kweight = vaspOUTCAR.getKSampling()
+param['k vectors'] = kvec
+param['k weights'] = kweight
+
+print("\nK-sampling info:")
+print("          coordinates              weight")
+for i in range(len(kvec)):
+    print("{:10.6f}{:10.6f}{:10.6f}{:12.6f}".format(
+        kvec[i,0], kvec[i,1], kvec[i,2], kweight[i]
+    ))
 
 #=================================================    
 # real calculation starts here
 # all calculation will be conducted k-point wise,
 # I will prepare two set of variables to track the current and total quantities along with the loops.
 # loops over spinors and kpoints...
+# summation over kpts will be weighted by kweights
 #=================================================    
 #
+
 
 #
 
