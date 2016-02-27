@@ -351,6 +351,10 @@ class WaveFunction:
 
         
     def getWPS(self): return self.__wps
+    def getNPlw(self): return self.__nplw
+    def getKVec(self): return self.__kvec
+    def getEig(self): return self.__eig
+    def getFermiW(self): return self.__FermiW
 
     def readKHeader(self):
         kheader = self.__WC.readKHeader(self.__ik)
