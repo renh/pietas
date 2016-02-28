@@ -49,7 +49,7 @@ output path : mode3
 
 # output quantities
 output quantities:
-  rho0    : True 
+  rho0    : False
   rho0_fd : True
   drhoP   : True 
   drhoI   : True

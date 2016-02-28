@@ -15,6 +15,7 @@ import outcar
 import helper
 import writelog
 import finitediff
+import th
 #=================================================
 
 # parse arguments
@@ -98,12 +99,11 @@ param['nbands'] = wc0.getNBands()
 #
 rgd = param.get('real grid density')
 a = wc0.getRealLatt()
-NGR = grid.real_grid(rgd, a)
+NGF = grid.real_grid(rgd, a)
 print("\nReal space grid (for FFT): NGXF = {:d}, NGYF = {:d}, NGZF = {:d}".format(
-    *NGR
+    *NGF
 ))
-param['NGR'] = NGR
-
+param['NGF'] = NGF
 
 # parse OUTCAR for necessary parameters
 OUTCAR_file = param.get('outcar').get('equilibrium')
@@ -131,6 +131,7 @@ for i in range(len(kvec)):
 # summation over kpts will be weighted by kweights
 #=================================================    
 #
+method = param.get('approximation')
 
 for ispin in range(param.get('nspin')):
     for ik in range(param.get('nkpts')):
@@ -142,8 +143,16 @@ for ispin in range(param.get('nspin')):
         psi_b = wf.WaveFunction(wcb, ispin, ik)
         psi_f = wf.WaveFunction(wcf, ispin, ik)
         kvec = psi_0.getKVec()
+        nplw = psi_0.getNPlw()
         print(" k-vector: {:10.3f}{:10.3f}{:10.3f}".format(*kvec))
+        GVEC = wc0.prepareGVEC(ik)
+        if (len(GVEC) != nplw):
+            raise ValueError("!!! Incorrect dimension for GVEC = {}, nplw = {}".format(
+                len(GVEC), nplw
+            ))
+        print(" {} G vectors prepared.".format(nplw))
 
+        
         # find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
         #    this contribution is Gaussian weighted:
         #        G(Ei, EF, sigma) >= cutoff
@@ -153,6 +162,18 @@ for ispin in range(param.get('nspin')):
         # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
         print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
         psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
+
+        # IETS calculation
+        if method.startswith('T'):
+            th.TersoffHamann(psi_fd, param)
+        elif method.startswith('B'):
+            print('Get into Bardeen method for IETS...')
+            print('  Not implemented yet, exit...')
+            raise SystemExit
+
+
+
+
         break
         pass
 

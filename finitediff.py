@@ -48,6 +48,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     E_b = psi_b.getEig()
     E_f = psi_f.getEig()
     E_0_fd = (E_b + E_f) / 2.0
+    gw_fd = helper.Gaussian(E_0_fd, EF, sigma)
 
     # In practice, we first construct the inner product matrix between backward and forward
     # displaced wavefunctions:
@@ -126,9 +127,10 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     dpsi_I *= (-0.5*PI)
     print("  Inelastic part dPsi_I calculated.")
     psi_fd = {}
-    psi_fd['Psi_0_fd'] = psi_0_fd
+    psi_fd['psi_0_fd'] = psi_0_fd
     psi_fd['dpsi_P'] = dpsi_P
     psi_fd['dpsi_I'] = dpsi_I
+    psi_fd['weights_fd'] = gw_fd[band_init : band_final+1]
     return psi_fd
                 
 
