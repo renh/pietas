@@ -357,7 +357,7 @@ class WaveFunction:
     def getFermiW(self): return self.__FermiW
 
     def readKHeader(self):
-        kheader = self.__WC.readKHeader(self.__ik)
+        kheader = self.__WC.readKHeader(self.__ispin, self.__ik)
         nplw, kvec, eig, FermiW = kheader
         return nplw, np.array(kvec), np.array(eig), np.array(FermiW)
     

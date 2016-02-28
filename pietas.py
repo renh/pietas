@@ -166,6 +166,11 @@ wcb = wf.WAVECAR(wcb)
 wcf = wf.WAVECAR(wcf)
 # now wc0, wcb and wcf are WAVECAR classes conneted to corresponding WAVECAR files.
 
+# get general info for the pseudo wavefunctions
+# nspin, nk, nb
+param['nspin'] = wc0.getNSpin()
+param['nkpts'] = wc0.getNKpts()
+param['nbands'] = wc0.getNBands()
 
 #
 # arrange real-space grid by using real-space lattice and real grid density
@@ -206,6 +211,11 @@ for i in range(len(kvec)):
 #=================================================    
 #
 
+for ispin in range(param.get('nspin')):
+    for ik in range(param.get('nk')):
+        # first find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
+        # 
+        pass
 
 #
 
