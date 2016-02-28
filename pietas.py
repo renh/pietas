@@ -12,7 +12,8 @@ import wavefunction as wf
 import checker
 import grid
 import outcar
-
+import helper
+import writelog
 #=================================================
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -139,7 +140,7 @@ else:
 #=================================================    
 
 #print(param)
-
+param['cutoff'] = float(param.get('cutoff'))
 #
 # connect to WAVECAR files for the equilibrium and backward/forward displaced systems
 #
@@ -212,9 +213,23 @@ for i in range(len(kvec)):
 #
 
 for ispin in range(param.get('nspin')):
-    for ik in range(param.get('nk')):
-        # first find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
-        # 
+    for ik in range(param.get('nkpts')):
+        print("\n" + "="*50)
+        print("\n Calculation for spin = {}, kpt = {}".format(ispin,ik))
+        print("\n"+"="*50+"\n")
+        # first get the WaveFunction objects @(isipn,ik)
+        psi_0 = wf.WaveFunction(wc0, ispin, ik)
+        psi_b = wf.WaveFunction(wcb, ispin, ik)
+        psi_f = wf.WaveFunction(wcf, ispin, ik)
+        kvec = psi_0.getKVec()
+        print(" k-vector: {:10.3f}{:10.3f}{:10.3f}".format(*kvec))
+
+        # find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
+        #    this contribution is Gaussian weighted:
+        #        G(Ei, EF, sigma) >= cutoff
+        bands_contrib = helper.getBandsRange(psi_0, psi_b, psi_f, param)
+        writelog.write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib)
+        break
         pass
 
 #
