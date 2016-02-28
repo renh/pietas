@@ -23,7 +23,7 @@ def write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib):
     E_b = psi_b.getEig()
     E_f = psi_f.getEig()
     
-    print("Bands taking into account for this k-point:")
+    print(" {} Bands taking into account for this k-point:".format(nbands_calc))
     print("  nb        E0          Eb          Ef        weight")
     for ibm in range(nbands_calc):
         m = band_init + ibm

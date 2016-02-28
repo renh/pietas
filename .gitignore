@@ -13,3 +13,6 @@ test.py
 
 # stdout/log files
 run.log
+
+# pycharm
+.idea

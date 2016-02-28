@@ -430,7 +430,7 @@ class WaveFunction:
         w = self.getWPS()
         w = np.dot(w.T, C)
         w = w.T
-        print('checking orthgonality...')
+        #print('checking orthgonality...')
 
         I = np.eye(len(w), dtype=np.complex128)
         WW = np.dot(
@@ -438,7 +438,7 @@ class WaveFunction:
         )
         orth_success = np.allclose(WW, I)
         if orth_success:
-            print("\nWavefunction orthogonalized.")
+            #print("Wavefunction orthogonalized.")
             return w
         else:
             raise ValueError('Orthognalization failed.')

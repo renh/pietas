@@ -14,6 +14,7 @@ import grid
 import outcar
 import helper
 import writelog
+import finitediff
 #=================================================
 
 # parse arguments
@@ -148,6 +149,10 @@ for ispin in range(param.get('nspin')):
         #        G(Ei, EF, sigma) >= cutoff
         bands_contrib = helper.getBandsRange(psi_0, psi_b, psi_f, param)
         writelog.write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib)
+
+        # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
+        print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
+        psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
         break
         pass
 
