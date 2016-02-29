@@ -58,7 +58,8 @@ output quantities:
   wae     : False
 
 # output formats
-WriteXSF   : True
-WriteNPY   : True
-WriteNetCDF: False
+output formats:
+  XSF   : True
+  NPY   : True
+  NetCDF: False
   

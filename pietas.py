@@ -145,6 +145,7 @@ for ispin in range(param.get('nspin')):
         kvec = psi_0.getKVec()
         nplw = psi_0.getNPlw()
         print(" k-vector: {:10.3f}{:10.3f}{:10.3f}".format(*kvec))
+
         GVEC = wc0.prepareGVEC(ik)
         if (len(GVEC) != nplw):
             raise ValueError("!!! Incorrect dimension for GVEC = {}, nplw = {}".format(
@@ -152,6 +153,7 @@ for ispin in range(param.get('nspin')):
             ))
         print(" {} G vectors prepared.".format(nplw))
 
+        param['index'] = grid.genIndex(GVEC, param.get('NGF'))
         
         # find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
         #    this contribution is Gaussian weighted:
@@ -165,7 +167,8 @@ for ispin in range(param.get('nspin')):
 
         # IETS calculation
         if method.startswith('T'):
-            th.TersoffHamann(psi_fd, param)
+            th_results = th.TersoffHamann(psi_fd, param)
+            #fileout.save_data(th_results, ispin, ik)
         elif method.startswith('B'):
             print('Get into Bardeen method for IETS...')
             print('  Not implemented yet, exit...')
