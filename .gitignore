@@ -7,6 +7,10 @@
 mode0/WAVECAR
 mode*/wave.*
 
+# running data
+mode*/*.npy
+mode*/*.xsf
+
 
 # scratch
 test.py
@@ -16,3 +20,6 @@ run.log
 
 # pycharm
 .idea
+
+# ipython notebook
+*ipynb*

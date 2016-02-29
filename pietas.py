@@ -16,6 +16,8 @@ import helper
 import writelog
 import finitediff
 import th
+import fileout
+import numpy as np
 #=================================================
 
 # parse arguments
@@ -132,6 +134,9 @@ for i in range(len(kvec)):
 #=================================================    
 #
 method = param.get('approximation')
+rho_0_fd = np.zeros(NGF)
+drho_P = np.zeros(NGF)
+drho_I = np.zeros(NGF)
 
 for ispin in range(param.get('nspin')):
     for ik in range(param.get('nkpts')):
@@ -168,17 +173,22 @@ for ispin in range(param.get('nspin')):
         # IETS calculation
         if method.startswith('T'):
             th_results = th.TersoffHamann(psi_fd, param)
-            #fileout.save_data(th_results, ispin, ik)
+            rho_0_fd += th_results.get('rho_0_fd') * kweight[ik]
+            drho_P += th_results.get('drho_P') * kweight[ik]
+            drho_I += th_results.get('drho_I') * kweight[ik]
+            fileout.save_thdata(th_results, ispin, ik, param)
         elif method.startswith('B'):
             print('Get into Bardeen method for IETS...')
             print('  Not implemented yet, exit...')
             raise SystemExit
 
 
+np.save('mode3/rho_0_fd.tot.npy',rho_0_fd)
+np.save('mode3/drho.P.tot.npy', drho_P)
+np.save('mode3/drho.I.tot.npy', drho_I)
 
 
-        break
-        pass
+
 
 #
 
