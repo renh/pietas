@@ -37,3 +37,23 @@ def real_grid(rgd, a):
         N = int(l / rgd) + 1
         NGF[i] = N
     return NGF
+
+def genIndex(GVEC, NGF):
+    """
+    Generate FFT index for a specific FFT grid NGF at a k point with G vectors GVEC.
+    
+    Args:
+        GVEC  : ndarray (nplw x 1), G Vectors in the unit of reciprocal lattice vectors.
+        NGF   : FFT grid for k-to-r fft
+    Returns:
+        index : index pointer to allocate the nplw Fourier coefficients in the wavefunction
+                objects (nplw x 1) to a 3D grid (NGXF x NGYF x NGZF)
+    Raises:
+        None
+    """
+    index = []
+    for G in GVEC:
+        index.append([
+            G[0]%NGF[0], G[1]%NGF[1], G[2]%NGF[2]
+        ])
+    return np.array(index)
