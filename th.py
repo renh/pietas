@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import scipy.fftpack
 
-def calc_LDOS(psi, weights, param):
+def calc_LDOS(psi, weights, index, param):
     """
     Calculate LDOS alike quantities from wavefunction psi and corresponding weight.
         \rho (r) = sum_{ib} < psi_{ib} |r >< r| psi_{ib} > * weight
@@ -18,7 +18,7 @@ def calc_LDOS(psi, weights, param):
             NGF    :  ndarray (3 x 1), FFT grid numbers
     """
     NGF = param.get('NGF')
-    index = param.get('index')
+    #index = param.get('index')
     nbands_calc = len(psi)
 
     rho = np.zeros(NGF)
@@ -38,7 +38,7 @@ def calc_LDOS(psi, weights, param):
     
 
 
-def TersoffHamann(psi_fd, param):
+def TersoffHamann(psi_fd, index, param):
     """
     Calculate LDOS and change in LDOS using the Tersoff-Hamann approximation.
     
@@ -72,9 +72,9 @@ def TersoffHamann(psi_fd, param):
     q_out = param.get('output quantities')
     fmt_out = param.get('output formats')
 
-    rho_0_fd = calc_LDOS(psi_0_fd, gw, param)
-    drho_P = calc_LDOS(dpsi_P, gw, param)
-    drho_I = calc_LDOS(dpsi_I, gw, param)
+    rho_0_fd = calc_LDOS(psi_0_fd, gw, index, param)
+    drho_P = calc_LDOS(dpsi_P, gw, index, param)
+    drho_I = calc_LDOS(dpsi_I, gw, index, param)
 
     print ("Get out Tersoff-Hamann calculation.")
     return {

@@ -134,9 +134,9 @@ for i in range(len(kvec)):
 #=================================================    
 #
 method = param.get('approximation')
-rho_0_fd = np.zeros(NGF)
-drho_P = np.zeros(NGF)
-drho_I = np.zeros(NGF)
+rho_0_fd_tot = np.zeros(NGF)
+drho_P_tot = np.zeros(NGF)
+drho_I_tot = np.zeros(NGF)
 
 for ispin in range(param.get('nspin')):
     for ik in range(param.get('nkpts')):
@@ -157,8 +157,11 @@ for ispin in range(param.get('nspin')):
                 len(GVEC), nplw
             ))
         print(" {} G vectors prepared.".format(nplw))
+        if (ik == 1):
+            np.save('GVEC.npy', GVEC)
+            #raise SystemExit
 
-        param['index'] = grid.genIndex(GVEC, param.get('NGF'))
+        index = grid.genIndex(GVEC, param.get('NGF'))
         
         # find the bands with non-negligible contributions to the (change of) Fermi lever LDOS
         #    this contribution is Gaussian weighted:
@@ -172,20 +175,21 @@ for ispin in range(param.get('nspin')):
 
         # IETS calculation
         if method.startswith('T'):
-            th_results = th.TersoffHamann(psi_fd, param)
-            rho_0_fd += th_results.get('rho_0_fd') * kweight[ik]
-            drho_P += th_results.get('drho_P') * kweight[ik]
-            drho_I += th_results.get('drho_I') * kweight[ik]
+            th_results = th.TersoffHamann(psi_fd, index, param)
             fileout.save_thdata(th_results, ispin, ik, param)
+            rho_0_fd_tot += th_results.get('rho_0_fd') * kweight[ik]
+            drho_P_tot += th_results.get('drho_P') * kweight[ik]
+            drho_I_tot += th_results.get('drho_I') * kweight[ik]
         elif method.startswith('B'):
             print('Get into Bardeen method for IETS...')
             print('  Not implemented yet, exit...')
-            raise SystemExit
+            #raise SystemExit
 
+        
 
-np.save('mode3/rho_0_fd.tot.npy',rho_0_fd)
-np.save('mode3/drho.P.tot.npy', drho_P)
-np.save('mode3/drho.I.tot.npy', drho_I)
+np.save('mode3/rho_0_fd.tot.npy',rho_0_fd_tot)
+np.save('mode3/drho.P.tot.npy', drho_P_tot)
+np.save('mode3/drho.I.tot.npy', drho_I_tot)
 
 
 

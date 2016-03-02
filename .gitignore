@@ -8,7 +8,7 @@ mode0/WAVECAR
 mode*/wave.*
 
 # running data
-mode*/*.npy
+*.npy
 mode*/*.xsf
 
 

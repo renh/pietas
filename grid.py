@@ -31,11 +31,14 @@ def real_grid(rgd, a):
     Raises:
         None
     """
-    NGF = np.zeros(3, dtype=np.int)
-    for i in range(3):
-        l = length(a[i])
-        N = int(l / rgd) + 1
-        NGF[i] = N
+    #NGF = np.zeros(3, dtype=np.int)
+    #for i in range(3):
+    #    l = length(a[i])
+    #    N = int(l / rgd)
+    #    NGF[i] = N
+    #return NGF
+    lengths = np.sqrt(np.sum(a*a, axis=1))
+    NGF = np.array(np.ceil(lengths/rgd), dtype=np.int)
     return NGF
 
 def genIndex(GVEC, NGF):

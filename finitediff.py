@@ -59,6 +59,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
 
     psi_b_calc = psi_b.getWAE()[band_init : band_final+1]
     nplw = len(psi_b_calc[0])
+    assert(nplw, psi_b.getNPlw())
     print("\n  All electron Psi^{-} calculated.")
 
     psi_f_calc = psi_f.getWAE()[band_init : band_final+1]
