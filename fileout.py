@@ -27,7 +27,7 @@ def save_thdata(th_results, ispin, ik, param):
 
     # write numpy npy files
     if fmt_out.get('NPY'):
-        for dname in ['rho_0_fd', 'drho_P', 'drho_I']:
+        for dname in ['rho_0_fd', 'drho_P', 'drho_I', 'rho_0_orig']:
             filename = basename.format(dname) + ".npy"
             np.save(filename, th_results.get(dname))
         

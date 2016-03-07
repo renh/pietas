@@ -21,6 +21,7 @@ def calc_LDOS(psi, weights, index, param):
     #index = param.get('index')
     nbands_calc = len(psi)
 
+
     rho = np.zeros(NGF)
     for ibm in range(nbands_calc):
         psi_i = np.zeros(NGF, dtype=np.complex128)
@@ -38,7 +39,7 @@ def calc_LDOS(psi, weights, index, param):
     
 
 
-def TersoffHamann(psi_fd, index, param):
+def TersoffHamann(psi_fd, psi_0_orig, index, param):
     """
     Calculate LDOS and change in LDOS using the Tersoff-Hamann approximation.
     
@@ -62,7 +63,7 @@ def TersoffHamann(psi_fd, index, param):
         itaI   : inelastic IETS efficiency
         itaT   : total IETS efficiency
     """
-    print('\nGet into Tersoff-Hamann calculation for IETS...')
+    print('\nTersoff-Hamann calculation for IETS...', end=' ')
 
     psi_0_fd = psi_fd['psi_0_fd']
     dpsi_P = psi_fd['dpsi_P']
@@ -72,13 +73,15 @@ def TersoffHamann(psi_fd, index, param):
     q_out = param.get('output quantities')
     fmt_out = param.get('output formats')
 
+    rho_0_orig = calc_LDOS(psi_0_orig, gw, index, param)
     rho_0_fd = calc_LDOS(psi_0_fd, gw, index, param)
     drho_P = calc_LDOS(dpsi_P, gw, index, param)
     drho_I = calc_LDOS(dpsi_I, gw, index, param)
 
-    print ("Get out Tersoff-Hamann calculation.")
-    return {
-        'rho_0_fd' : rho_0_fd,
-        'drho_P'   : drho_P,
-        'drho_I'   : drho_I
-    }
+    print ("FNISHED.")
+    rho_this = {}
+    rho_this['rho_0_orig'] = rho_0_orig
+    rho_this['rho_0_fd'] = rho_0_fd
+    rho_this['drho_P'] = drho_P
+    rho_this['drho_I'] = drho_I
+    return rho_this
