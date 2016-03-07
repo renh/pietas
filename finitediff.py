@@ -64,6 +64,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
 
     psi_f_calc = psi_f.getWAE()[band_init : band_final+1]
     print("  All electron Psi^{+} calculated.")
+    
     A = np.dot(
         np.conj(psi_b_calc), psi_f_calc.T
     )

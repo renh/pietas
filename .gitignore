@@ -7,6 +7,9 @@
 mode0/WAVECAR
 mode*/wave.*
 
+# VASP OUTCAR
+mode0/OUTCAR
+
 # running data
 *.npy
 mode*/*.xsf
