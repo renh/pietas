@@ -188,11 +188,11 @@ for ispin in range(param.get('nspin')):
             print('  Not implemented yet, exit...')
             #raise SystemExit
 
-        
-np.save('mode3/rho_0_orig.tot.npy', rho_0_orig_tot)
-np.save('mode3/rho_0_fd.tot.npy',rho_0_fd_tot)
-np.save('mode3/drho.P.tot.npy', drho_P_tot)
-np.save('mode3/drho.I.tot.npy', drho_I_tot)
+opath = param.get('output path')
+np.save('{}/rho_0_orig.tot.npy'.format(opath), rho_0_orig_tot)
+np.save('{}/rho_0_fd.tot.npy'.format(opath),rho_0_fd_tot)
+np.save('{}/drho.P.tot.npy'.format(opath), drho_P_tot)
+np.save('{}/drho.I.tot.npy'.format(opath), drho_I_tot)
 
 
 
