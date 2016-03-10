@@ -30,8 +30,8 @@ class OUTCAR:
             efermi:  real, Fermi energy
         """
         with open(self.__fname, 'r') as fh:
-            for l in fh:
-                l = l.strip()
+            while True:
+                l = fh.readline().strip()
                 if l.startswith('E-fermi'):
                     break
         efermi = float(l.split()[2])
@@ -49,13 +49,14 @@ class OUTCAR:
             None
         """
         with open(self.__fname, 'r') as fh:
-            for l in fh:
+            while True:
+                l = fh.readline()
                 if l.startswith(' Following reciprocal coordinates:'):
                     break
-            l = fh.next()
+            l = fh.readline()
             dump = []
             while True:
-                l = fh.next()
+                l = fh.readline()
                 if len(l) < 10:
                     break
                 dump.append([float(x) for x in l.split()])
@@ -76,7 +77,8 @@ class OUTCAR:
         """
         pattern = "   {}".format(param)
         with open(self.__fname, 'r') as fh:
-            for l in fh:
+            while True:
+                l = fh.readline()
                 if l.startswith(pattern):
                     break
             value = l.split()[2]
@@ -93,7 +95,8 @@ class OUTCAR:
             None
         """
         with open(self.__fname, 'r') as fh:
-            for l in fh:
+            while True:
+                l = fh.readline()
                 if l.startswith('   Degrees of freedom'):
                     break
             dof = int(l.split()[-1])
@@ -122,7 +125,8 @@ class OUTCAR:
 
     def getIonsPerType(self):
         with open(self.__fname, 'r') as fh:
-            for l in fh:
+            while True:
+                l = fh.readline()
                 if l.startswith('   ions per type'):
                     break
             IonsPerType = [int(x) for x in l.split()[4:]]
@@ -137,7 +141,8 @@ class OUTCAR:
     def getIonTypes(self):
         with open(self.__fname, 'r') as fh:
             types = []
-            for l in fh:
+            while True:
+                l = fh.readline()
                 if l.startswith(' POTCAR'):
                     types.append(l.split()[2])
                     if len(types) == self.__NTypes:
