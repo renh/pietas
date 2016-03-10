@@ -126,7 +126,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
                 dpsi_I[ibn] += psi_0_fd[ibm] * C[ibm,ibn] * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
                     E_0_fd[n], E_0_fd[m], sigma
                 )
-    dpsi_I *= (-0.5*PI)
+    dpsi_I *= (-1.0j*PI)
     print("  Inelastic part dPsi_I calculated.")
     psi_fd = {}
     psi_fd['psi_0_fd'] = psi_0_fd
