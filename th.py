@@ -63,7 +63,7 @@ def TersoffHamann(psi_fd, psi_0_orig, index, param):
         itaI   : inelastic IETS efficiency
         itaT   : total IETS efficiency
     """
-    print('\nTersoff-Hamann calculation for IETS...', end=' ')
+    print('\nTersoff-Hamann calculation for LDOS...', end=' ')
 
     psi_0_fd = psi_fd['psi_0_fd']
     dpsi_P = psi_fd['dpsi_P']
