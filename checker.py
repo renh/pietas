@@ -62,7 +62,7 @@ def check_WAVECAR(wavecar1, wavecar2):
 
             # number of Fermi weights
             nw1 = len(kh1[3]); nw2 = len(kh2[3])
-            assert(nw1, nw2)
+            assert(nw1 = nw2)
 
     print("\nVASP WAVECAR files:'{}' and '{}'\n\tconsistency check passed.".format(
         wavecar1, wavecar2
