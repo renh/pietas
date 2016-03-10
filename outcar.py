@@ -134,7 +134,7 @@ class OUTCAR:
     def getNTypes(self):
         return len(self.__IonsPerType)
     
-    def getTypes(self):
+    def getIonTypes(self):
         with open(self.__fname, 'r') as fh:
             types = []
             for l in fh:
@@ -236,4 +236,9 @@ if __name__ == '__main__':
     omega = m.get('Omega')
     mode = m.get('mode')
     print(omega)
-    print(mode)
+    #print(mode)
+
+    IonsPerType = vo.getIonsPerType()
+    IonTypes = vo.getIonTypes()
+    print(zip(IonTypes, IonsPerType))
+    

@@ -9,6 +9,7 @@ mode*/wave.*
 
 # VASP OUTCAR
 mode0/OUTCAR
+freq/OUTCAR
 
 # running data
 *.npy
@@ -26,3 +27,7 @@ run.log
 
 # ipython notebook
 *ipynb*
+
+
+# genmode outputs
+f0.*/
