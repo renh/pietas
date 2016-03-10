@@ -3,7 +3,7 @@
 import os
 from wavefunction import WAVECAR
 import numpy as np
-import hashlib
+import filecmp
 
 def check_WAVECAR(wavecar1, wavecar2):
     """
@@ -62,7 +62,7 @@ def check_WAVECAR(wavecar1, wavecar2):
 
             # number of Fermi weights
             nw1 = len(kh1[3]); nw2 = len(kh2[3])
-            assert(nw1 = nw2)
+            assert(nw1 == nw2)
 
     print("\nVASP WAVECAR files:'{}' and '{}'\n\tconsistency check passed.".format(
         wavecar1, wavecar2
@@ -80,18 +80,14 @@ def same_file(wavecar1, wavecar2, wavecar3):
     Raises:
         None
     """
-    d1 = hashlib.md5(wavecar1)
-    d2 = hashlib.md5(wavecar2)
-    d3 = hashlib.md5(wavecar3)
-
     same = False
-    if (d1 == d2):
+    if (filecmp.cmp(wavecar1, wavecar2, shallow=False)):
         print("Serious problem:: {} and {} are the same".format(wavecar1, wavecar2))
         same = True
-    if (d1 == d3):
+    if (filecmp.cmp(wavecar1, wavecar3, shallow=False)):
         print("Serious problem:: {} and {} are the same".format(wavecar1, wavecar3))
         same = True
-    if (d2 == d3):
+    if (filecmp.cmp(wavecar2, wavecar3, shallow=False)):
         print("Serious problem:: {} and {} are the same".format(wavecar2, wavecar3))
         same = True
 
