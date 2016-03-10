@@ -5,6 +5,7 @@ import shutil
 import argparse
 import numpy as np
 import outcar
+from constant import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input',
@@ -91,24 +92,35 @@ for mode in modes:
     print("mode #{:3d} :  ".format(mode), end='')
     m = out.getNormalMode(mode)
     omega = m.get('Omega')
-    dX = m.get('mode')
+    l = m.get('mode')
 
-    dX *= scale_factor
+    mu = 1.0 / (np.sum(l*l))
+    Q_norm = (1.0 / (2.0*mu*AMTOAU*(omega/NU0_THz))) ** 0.5 * AUTOA
+    print(" mu = {:7.3f}, |Q| = {:7.4f} Ang".format(mu, Q_norm))
+
+    l_norm = np.sum(l*l) ** 0.5
+    this_factor = (Q_norm * scale_factor) / l_norm
+    dX = l * this_factor
+    #print(this_factor)
+    #print(dX)
+    #if (mode == 3): break
+    dx_max = np.max(np.abs(dX))
+    if dx_max < 0.01:
+        print(" Warning: too small atomic displacement: max(|dx|) =  {}".format(dx_max))
 
     # create POSCAR files for positive and negative displaced coord
     #  and write headers to them
     poscar_p = '{}/POSCAR.+m{:03d}'.format(path, mode)
     poscar_p_fh = open(poscar_p, 'w')
-    print("writing to {} and ".format(poscar_p), end='')
     poscar_p_fh.writelines(header)
     poscar_m = '{}/POSCAR.-m{:03d}'.format(path, mode)
     poscar_m_fh = open(poscar_m, 'w')
-    print("{}...DONE!".format(poscar_m))
     poscar_m_fh.writelines(header)
 
     # write displaced coord to POSCARs
     fmt = "{:24.16f}"*3 + "\n"
     newX = X0 + dX
+    print("writing to {} and ".format(poscar_p), end='')
     for i in range(NAtoms):
         poscar_p_fh.write(fmt.format(*newX[i]))
     poscar_p_fh.close()
@@ -117,10 +129,8 @@ for mode in modes:
     for i in range(NAtoms):
         poscar_m_fh.write(fmt.format(*newX[i]))
     poscar_m_fh.close()
-        
-        
-    
-    
+    print("{}...DONE!\n".format(poscar_m))
+
 
 
 

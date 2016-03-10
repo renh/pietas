@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Module imports
+from __future__ import print_function
 #==============================================================================
 #  Some important Parameters, to convert to a.u., 
 #  taken from VASP.4.6/constant.inc
@@ -39,3 +40,13 @@ AUTOA3 = AUTOA2 * AUTOA
 AUTOA4 = AUTOA2 * AUTOA2
 AUTOA5 = AUTOA2 * AUTOA3
 
+# Add for reduced mass calculation
+ALPHA = 1.0/137.00
+C0 = 299792458.0
+V0 = ALPHA*C0
+NU0 = V0/AUTOA*1E10
+NU0_THz = NU0 / 1E12
+AMTOAU = 1822.88839
+
+if __name__ == '__main__':
+    print(NU0_THz)
