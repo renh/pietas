@@ -184,7 +184,9 @@ class OUTCAR:
                 if l.startswith(pattern):
                     break
             dump = l.split()
-            Omega = float(dump[5])  # THz
+            Omega = dump[3:]  # 4x2 datasets, \nu(THz), \omega(THz), wavenumber(cm-1), and energy(meV)
+            for i in range(4):
+                Omega[2*i] = float(Omega[2*i])
 
             l = fh.readline()
             mode = []

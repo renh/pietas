@@ -91,7 +91,7 @@ print("\n\nGenerating displaced geometry:\n")
 for mode in modes:
     print("mode #{:3d} :  ".format(mode), end='')
     m = out.getNormalMode(mode)
-    omega = m.get('Omega')
+    omega = m.get('Omega')[2] # angular freq in THz
     l = m.get('mode')
 
     mu = 1.0 / (np.sum(l*l))
