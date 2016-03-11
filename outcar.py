@@ -178,13 +178,22 @@ class OUTCAR:
             raise ValueError("I need a VASP calculation with IBRION=5! exit..")
         
         pattern = '{:4d} f  ='.format(imode)
+        pattern_i = '{:4d} f/i='.format(imode)
+        img_mode = False
         with open(self.__fname, 'r') as fh:
             while True:
                 l = fh.readline()
                 if l.startswith(pattern):
+                    dump = l.split()
+                    Omega = dump[3:]
                     break
-            dump = l.split()
-            Omega = dump[3:]  # 4x2 datasets, \nu(THz), \omega(THz), wavenumber(cm-1), and energy(meV)
+                if l.startswith(pattern_i):
+                    img_mode = True
+                    dump = l.split()
+                    Omega = dump[2:]
+                    break
+            #dump = l.split()
+            #Omega = dump[3:]  # 4x2 datasets, \nu(THz), \omega(THz), wavenumber(cm-1), and energy(meV)
             for i in range(4):
                 Omega[2*i] = float(Omega[2*i])
 
