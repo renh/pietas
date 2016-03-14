@@ -227,7 +227,7 @@ class WAVECAR:
         ))
         return bands
 
-    def readBandCoeff(self, ispin=0, ik=0, ib=0):
+    def readBandCoeff(self, ispin=0, ik=0, ib=0, normalize=True):
         '''
         Read band coefficients for index (ispin, ik, ib)
         Args:
@@ -253,9 +253,9 @@ class WAVECAR:
         # expand coefficients into double precision complex and re-normalize if required
         coeff = np.array(coeff, dtype = np.complex128)
 
-        #if normalize:
-        #    dump = np.dot(np.conj(coeff), coeff)
-        #    coeff /= np.sqrt(dump)
+        if normalize:
+            dump = np.dot(np.conj(coeff), coeff)
+            coeff /= np.sqrt(dump)
         
         return coeff
 
