@@ -1,0 +1,65 @@
+--- # STM-IETS input configuration
+wavecar:
+  equilibrium : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode0/WAVECAR
+  backward    : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode4/b/WAVECAR
+  forward     : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode4/f/WAVECAR
+
+outcar:
+  equilibrium : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode0/OUTCAR
+
+# whether read all-electron wavefunctions ?
+read:
+  wae    : False
+
+# output path
+output path : mode3
+
+# wae filename nomencultures, using python format string
+wae fname:
+  equilibrium : mode0/wae.spin-{:1d}.k-{:02d}.npy
+  backward    : mode3/wae.b.spin-{:1d}.k-{:02d}.npy
+  forward     : mode3/wae.f.spin-{:1d}.k-{:02d}.npy
+  
+
+#
+# Calculation parameters
+#
+
+# Gaussian broadening width for eigen-engies in eV
+sigma   :  0.25 
+
+# Gaussian weight cutoff
+cutoff  :  1E-4
+
+# scale factor for finite-difference
+scale factor :  0.4
+
+# Approximation method
+#  currently support Tersoff-Hamann approx.
+#  will implement Bardeen shortly
+approximation :  TH
+
+# grid density for real-space quantities, rho, psi(r), etc
+real grid density: 0.2
+
+
+#
+# OUTPUT 
+#
+
+# output quantities
+output quantities:
+  rho0    : False
+  rho0_fd : True
+  drhoP   : True 
+  drhoI   : True
+  itaP    : True
+  itaI    : True
+  wae     : False
+
+# output formats
+output formats:
+  XSF   : True
+  NPY   : True
+  NetCDF: False
+  

@@ -12,7 +12,7 @@ mode0/OUTCAR
 freq/OUTCAR
 
 # running data
-*.npy
+mode*/*.npy
 mode*/*.xsf
 
 
