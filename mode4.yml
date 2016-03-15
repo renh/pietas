@@ -12,7 +12,7 @@ read:
   wae    : False
 
 # output path
-output path : mode3
+output path : mode4
 
 # wae filename nomencultures, using python format string
 wae fname:

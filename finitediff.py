@@ -84,7 +84,8 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
 
     psi_b_calc_proj = []
     for ibm in range(nbands_calc):
-        psi_b_calc_proj.append(psi_b_calc[ibm] / np.conj(A[ibm,ibm]))
+        dump = psi_b_calc[ibm] / np.conj(A[ibm,ibm])
+        psi_b_calc_proj.append(dump / np.sqrt(inner_product(dump, dump)))
     psi_b_calc_proj = np.array(psi_b_calc_proj)
     dpsi_P = (psi_f_calc - psi_b_calc_proj) / (2.0 * scale)
     print("\n  Principal part dPsi_P calculated.")
