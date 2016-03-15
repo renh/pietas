@@ -5,7 +5,7 @@ from __future__ import print_function
 import logging
 
 
-version = '0.1'
+version = '0.2'
 
 def print_version_info():
     """
