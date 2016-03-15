@@ -1,11 +1,11 @@
 --- # STM-IETS input configuration
 wavecar:
-  equilibrium : mode0/WAVECAR
-  backward    : mode3/wave.b
-  forward     : mode3/wave.f
+  equilibrium : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode0/WAVECAR
+  backward    : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode3/b/WAVECAR
+  forward     : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode3/f/WAVECAR
 
 outcar:
-  equilibrium : mode0/OUTCAR
+  equilibrium : /Volumes/Porter/iets_extra/f0.1_k44_newsrc/mode0/OUTCAR
 
 # whether read all-electron wavefunctions ?
 read:
@@ -29,7 +29,7 @@ sigma   :  0.25
 cutoff  :  1E-4
 
 # scale factor for finite-difference
-scale factor :  0.1
+scale factor :  0.4
 
 # Approximation method
 #  currently support Tersoff-Hamann approx.

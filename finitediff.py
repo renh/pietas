@@ -57,12 +57,14 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     # and the inter-band mixing coefficients
     #A = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
 
-    psi_b_calc = psi_b.getWAE()[band_init : band_final+1]
+    # psi_b_calc = psi_b.getWAE()[band_init : band_final+1]
+    psi_b_calc = psi_b.getWPS()[band_init : band_final+1]
     nplw = len(psi_b_calc[0])
     assert(nplw == psi_b.getNPlw())
     print("\n  All electron Psi^{-} calculated.")
 
-    psi_f_calc = psi_f.getWAE()[band_init : band_final+1]
+    #psi_f_calc = psi_f.getWAE()[band_init : band_final+1]
+    psi_f_calc = psi_f.getWPS()[band_init : band_final+1]
     print("  All electron Psi^{+} calculated.")
     
     A = np.dot(

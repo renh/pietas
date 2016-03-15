@@ -227,7 +227,7 @@ class WAVECAR:
         ))
         return bands
 
-    def readBandCoeff(self, ispin=0, ik=0, ib=0, normalize=True):
+    def readBandCoeff(self, ispin=0, ik=0, ib=0, normalize=False):
         '''
         Read band coefficients for index (ispin, ik, ib)
         Args:
@@ -330,7 +330,7 @@ class WaveFunction:
     describe the wavefunction (pseudo and all-electron) for specified spin and kpt indices.
     usage: WaveFunction(WAVECAR, ispin, ik)
     """
-    def __init__(self, WAVECAR, ispin = 0, ik = 0):
+    def __init__(self, WAVECAR, ispin = 0, ik = 0, normalize=False):
         """
         Initializer for class WaveFunction.
         Args:
@@ -342,12 +342,14 @@ class WaveFunction:
         Raises:
             None
         """
+        self.__normalize = normalize
         self.__WC = WAVECAR
         self.__nb = self.__WC.getNBands()
         self.__ispin = ispin
         self.__ik = ik
         self.__nplw, self.__kvec, self.__eig, self.__FermiW = self.readKHeader()
         self.__wps = self.readWPS()
+        
 
         
     def getWPS(self): return self.__wps
@@ -367,7 +369,7 @@ class WaveFunction:
         nplw = self.__nplw
         wps = np.zeros([nb, nplw], dtype=np.complex128)
         for ib in range(nb):
-            wps[ib] = WC.readBandCoeff(self.__ispin, self.__ik, ib)
+            wps[ib] = WC.readBandCoeff(self.__ispin, self.__ik, ib, normalize=self.__normalize)
         return wps
 
     def getOverlap(self):
