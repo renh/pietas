@@ -413,7 +413,7 @@ class WaveFunction:
             C = np.dot(W,wsw)
         else:
             C = scipy.linalg.inv(S)       # (S)^{-1}
-            C = scipy.linalg.sqrtm(s)     # (S)^{-1/2}
+            C = scipy.linalg.sqrtm(C)     # (S)^{-1/2}
 
         return C
 
@@ -446,15 +446,6 @@ class WaveFunction:
             raise ValueError('Orthognalization failed.')
         
 
-    
-            
-            
-        
-        
-        
-        
-     
-        
 
 
 

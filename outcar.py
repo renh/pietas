@@ -18,7 +18,9 @@ class OUTCAR:
         self.__IonsPerType = self.getIonsPerType()
         self.__NIons = self.getNIons()
         self.__NTypes = self.getNTypes()
+        self.__IonTypes = self.getIonTypes()
         self.__IonMasses = self.getIonMasses()
+        self.__IonList = self.getIonList()
         self.__IBRION = int(self.getParameter('IBRION'))
 
     def getFermiEnergy(self):
@@ -148,6 +150,14 @@ class OUTCAR:
                     if len(types) == self.__NTypes:
                         break
         return types
+
+    def getIonList(self):
+        il = []
+        for it in range(self.__NTypes):
+            il.extend(
+                [self.__IonTypes[it]] * self.__IonsPerType[it]
+            )
+        return il
 
     def getLattice(self):
         with open(self.__fname, 'r') as fh:
