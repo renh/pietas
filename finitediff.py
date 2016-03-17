@@ -61,11 +61,11 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     psi_b_calc = psi_b.getWPS()[band_init : band_final+1]
     nplw = len(psi_b_calc[0])
     assert(nplw == psi_b.getNPlw())
-    print("\n  All electron Psi^{-} calculated.")
+    print("\n  Wavefunction Psi^{-} read.")
 
     #psi_f_calc = psi_f.getWAE(OccWeighted=False)[band_init : band_final+1]
     psi_f_calc = psi_f.getWPS()[band_init : band_final+1]
-    print("  All electron Psi^{+} calculated.")
+    print("  Wavefunction Psi^{+} read.")
     
     A = np.dot(
         np.conj(psi_b_calc), psi_f_calc.T
@@ -126,7 +126,9 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
                     E_f[n], E_b[n], sigma
                 )
             else:
-                dpsi_I[ibn] += psi_0_fd[ibm] * C[ibm,ibn] * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
+                #dpsi_I[ibn] += psi_0_fd[ibm] * C[ibm,ibn] * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
+                #    E_0_fd[n], E_0_fd[m], sigma
+                dpsi_I[ibn] += psi_0_fd[ibm] * np.dot(np.conj(psi_0_fd[ibm]), dpsi_P[ibn]) * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
                     E_0_fd[n], E_0_fd[m], sigma
                 )
     dpsi_I *= (-1.0j*PI)
