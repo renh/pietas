@@ -70,6 +70,11 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     A = np.dot(
         np.conj(psi_b_calc), psi_f_calc.T
     )
+    A_norm = np.sqrt(np.conj(A) * A)
+    A = A / A_norm
+    assert(np.allclose(
+        np.conj(A)*A, np.ones(A.shape)
+    ))
     print("\n  Innerproduct matrix < Psi^{-} | Psi^{+} > calculated.")
 
 
@@ -85,7 +90,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     psi_b_calc_proj = []
     for ibm in range(nbands_calc):
         dump = psi_b_calc[ibm] / np.conj(A[ibm,ibm])
-        psi_b_calc_proj.append(dump / np.sqrt(inner_product(dump, dump)))
+        psi_b_calc_proj.append(dump) # / np.sqrt(inner_product(dump, dump)))
     psi_b_calc_proj = np.array(psi_b_calc_proj)
     dpsi_P = (psi_f_calc - psi_b_calc_proj) / (2.0 * scale)
     print("\n  Principal part dPsi_P calculated.")
