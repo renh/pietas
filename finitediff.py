@@ -73,7 +73,7 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     # renormalize A that the wavefunction from which be projected will just
     # rotate with a phase factor with norm 1.
     A_norm = np.sqrt(np.conj(A) * A)
-    A /= A_norm
+    A = A / A_norm
     assert(np.allclose(np.ones(A.shape), np.conj(A)*A))
     print("\n  Phase factor matrix < Psi^{-} | Psi^{+} > calculated.")
 
@@ -132,9 +132,12 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
                     E_f[n], E_b[n], sigma
                 )
             else:
-                dpsi_I[ibn] += psi_0_fd[ibm] * C[ibm,ibn] * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
+                #dpsi_I[ibn] += psi_0_fd[ibm] * C[ibm,ibn] * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
+                #    E_0_fd[n], E_0_fd[m], sigma
+                dpsi_I[ibn] += psi_0_fd[ibm] * np.dot(np.conj(psi_0_fd[ibm]), dpsi_P[ibn]) * (E_0_fd[n] - E_0_fd[m]) * helper.Gaussian(
                     E_0_fd[n], E_0_fd[m], sigma
                 )
+                
     dpsi_I *= (-1.0j*PI)
     print("  Inelastic part dPsi_I calculated.")
     psi_fd = {}
