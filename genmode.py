@@ -13,7 +13,7 @@ parser.add_argument('-i', '--input',
                     default = 'OUTCAR')
 parser.add_argument('-f', '--scale',
                     help = 'Scale factor to displace configuration along vib mode',
-                    default = 0.5, type=float)
+                    default = 1.0, type=float)
 parser.add_argument('-m', '--mode',
                     help = 'Mode number (from 0) for which to generate new configurations',
                     type = int, default = None)
