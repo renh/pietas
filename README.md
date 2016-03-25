@@ -1,5 +1,5 @@
 # Pietas V0.3
-Pietas aims to be a Platform for InElastic Tunneling At Surfaces. It is a first-principles post-processing code based on VASP electronic structure calculation. We used finite difference method to calculate the change in wavefunctions along a vibration normal mode, according to the poineering works by Prof. N. Lorente et al. [PRL, 85, 2997(2000); Farady Discuss. 117, 277(2000)]. The current implementation is baed on our previous FORTRAN code completed around 2008 [H. Ren, JCP, 130, 134707(2009)]. Currently only the Tersorff-Hamann approximation is implemented.
+Pietas aims to be a Platform for InElastic Tunneling At Surfaces. It is a first-principles post-processing code based on VASP electronic structure calculation. We used finite difference method to calculate the change in wavefunctions along a vibration normal mode, according to the poineering works by Prof. N. Lorente et al. [[PRL, 85, 2997(2000)](http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.85.2997); [Farady Discuss. 117, 277(2000)](http://pubs.rsc.org/en/content/articlelanding/2000/fd/b002826f)]. The current implementation is baed on our previous FORTRAN code completed around 2008 [[H. Ren, et al. JCP, 130, 134707(2009)](http://scitation.aip.org/content/aip/journal/jcp/130/13/10.1063/1.3106235)]. Currently only the Tersorff-Hamann approximation is implemented.
 
 # Requirements
  * Python (2.7+ or 3.4+)
@@ -11,11 +11,11 @@ Pietas aims to be a Platform for InElastic Tunneling At Surfaces. It is a first-
 Unpack the package to any directory you can access (say `$PIETAS`), make sure all the required modules are available in the python environment you are using.
 Optionaly you can also create a shortcut for your lcoal environment:
 ```shell
-cd pietas
+$ cd pietas
 $ export PIETAS=`pwd`
 ```
 
-I personaly recommend the [Anacoda Python distribution](http://www.anaconda.com), which contains most of the modules widely used in the scientific computation community, as well as Intel MKL acceleration with auto parallization via openmp.
+I personaly recommend the [Anacoda Python distribution](http://www.continuum.io), which contains most of the modules widely used in the scientific computation community, as well as Intel MKL acceleration with auto parallization via openmp.
 
 # Run an example
 The examples lies in the directory $PIETAS/examples. Currently we have only one classic case CO adsorbed on Cu(100) surface ($PIETAS/examples/CO\@Cu100).
