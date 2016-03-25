@@ -1,4 +1,4 @@
-# Pietas
+# Pietas V0.3
 Pietas aims to be a Platform for InElastic Tunneling At Surfaces. It is a first-principles post-processing code based on VASP electronic structure calculation. We used finite difference method to calculate the change in wavefunctions along a vibration normal mode, according to the poineering works by Prof. N. Lorente et al. [PRL, 85, 2997(2000); Farady Discuss. 117, 277(2000)]. The current implementation is baed on our previous FORTRAN code completed around 2008 [H. Ren, JCP, 130, 134707(2009)]. Currently only the Tersorff-Hamann approximation is implemented.
 
 # Requirements
