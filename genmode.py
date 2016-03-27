@@ -2,6 +2,7 @@ from __future__ import print_function
 import os
 import datetime
 import shutil
+import time
 import argparse
 import numpy as np
 import outcar
@@ -11,9 +12,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input',
                     help = 'Input (VASE IBRION=5 output',
                     default = 'OUTCAR')
-parser.add_argument('-f', '--scale',
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-f', '--scale',
                     help = 'Scale factor to displace configuration along vib mode',
-                    default = 1.0, type=float)
+                    default = None, type=float)
+group.add_argument('-n', '--norm',
+                   help = 'norm of the displacement vector in Cartesian (not mass weighted) coordinates',
+                   default = 0.1, type=float)
+
 parser.add_argument('-m', '--mode',
                     help = 'Mode number (from 0) for which to generate new configurations',
                     type = int, default = None)
@@ -26,7 +32,22 @@ try:
 except:
     raise IOError("Failed open file '{}', exit..".format(VASP_OUTCAR))
 
-scale_factor = args.scale
+# scale factor related
+fixed_norm = False
+if not args.scale is None:
+    print("Warning: I strongly recommend not use the '-f' argument to specify the scale factor,\n"
+          " since in that case I will generate structures with different amount of nucleic displacement.\n"
+          "\nPress Ctrl-C to cancel the current generation (in 10 seconds ...)"
+    )
+    time.sleep(10)
+    scale_factor = args.scale
+else:
+    fixed_norm = True
+    disp_norm = args.norm
+    print("Using fixed norm for displacement vector: {} Ang".format(disp_norm))
+    
+    
+
 
 # first check OUTCAR is generated from a IBRION=5 calculation
 out = outcar.OUTCAR(VASP_OUTCAR)
@@ -60,7 +81,11 @@ else:
     modes = [args.mode]
 
 # make a new directory for generated displaced configurations
-path = 'f{}'.format(scale_factor)
+if fixed_norm:
+    path = 'n{}'.format(disp_norm)
+else:
+    path = 'f{}'.format(scale_factor)
+    
 if os.path.exists(path):
     time_str = datetime.datetime.fromtimestamp(
         os.path.getmtime(path)
@@ -86,7 +111,11 @@ sixth_line = sixth_line.format(*[ion[1] for ion in ions])
 header += sixth_line
 header += 'Cartesian\n'
 
-# displaced coordinates
+# record the scale factor for each normal mode in the fixed_norm generation
+fname = '{}/scale.dat'.format(path)
+scale_fh = open(fname, 'w')
+
+# displacing coordinates
 print("\n\nGenerating displaced geometry:\n")
 for mode in modes:
     print("mode #{:3d} :  ".format(mode), end='')
@@ -96,10 +125,14 @@ for mode in modes:
 
     mu = 1.0 / (np.sum(l*l))
     Q_norm = (1.0 / (2.0*mu*AMTOAU*(omega/NU0_THz))) ** 0.5 * AUTOA
-    print(" mu = {:7.3f}, |Q| = {:7.4f} Ang".format(mu, Q_norm))
-
     l_norm = np.sum(l*l) ** 0.5
-    this_factor = (Q_norm * scale_factor) / l_norm
+    print(" mu = {:7.3f}, |Q| = {:7.4f}, |L| = {:7.4f} Ang".format(mu, Q_norm, l_norm))
+
+    if fixed_norm:
+        this_factor = disp_norm / l_norm
+        scale_fh.write('{:3d}  {:8.4f}\n'.format(mode, disp_norm / Q_norm))
+    else:
+        this_factor = (Q_norm * scale_factor) / l_norm
     dX = l * this_factor
     #print(this_factor)
     #print(dX)

@@ -29,6 +29,7 @@ run.log
 
 # genmode outputs
 f0.*/
+n0.*/
 
 # input files
 *.yml
