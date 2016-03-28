@@ -34,3 +34,6 @@ n0.*/
 # input files
 *.yml
 
+# viewmodes outputs
+*.mol
+
