@@ -136,6 +136,12 @@ for i in range(len(kvec)):
 method = param.get('approximation')
 
 opath = param.get('output path')
+if os.path.exists(opath):
+    os.mkdir(opath)
+else:
+    print("\n*******************************************************")
+    print( "* Warning: files in directory {} might be overwritten! *")
+    print("*******************************************************\n")
 for ispin in range(param.get('nspin')):
     rho_0_fd_tot = np.zeros(NGF)
     drho_P_tot = np.zeros(NGF)
