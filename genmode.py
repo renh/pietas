@@ -21,7 +21,7 @@ group.add_argument('-n', '--norm',
                    default = 0.1, type=float)
 
 parser.add_argument('-m', '--mode',
-                    help = 'Mode number (from 0) for which to generate new configurations',
+                    help = 'Mode number (from 1) for which to generate new configurations',
                     type = int, default = None)
 args = parser.parse_args()
 
