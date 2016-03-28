@@ -134,12 +134,14 @@ for i in range(len(kvec)):
 #=================================================    
 #
 method = param.get('approximation')
-rho_0_fd_tot = np.zeros(NGF)
-drho_P_tot = np.zeros(NGF)
-drho_I_tot = np.zeros(NGF)
-rho_0_orig_tot = np.zeros(NGF)
 
+opath = param.get('output path')
 for ispin in range(param.get('nspin')):
+    rho_0_fd_tot = np.zeros(NGF)
+    drho_P_tot = np.zeros(NGF)
+    drho_I_tot = np.zeros(NGF)
+    rho_0_orig_tot = np.zeros(NGF)
+
     for ik in range(param.get('nkpts')):
         print("\n" + "="*50)
         print("\n Calculation for spin = {}, kpt = {}".format(ispin,ik))
@@ -188,11 +190,11 @@ for ispin in range(param.get('nspin')):
             print('  Not implemented yet, exit...')
             #raise SystemExit
 
-opath = param.get('output path')
-np.save('{}/rho_0_orig.tot.npy'.format(opath), rho_0_orig_tot)
-np.save('{}/rho_0_fd.tot.npy'.format(opath),rho_0_fd_tot)
-np.save('{}/drho.P.tot.npy'.format(opath), drho_P_tot)
-np.save('{}/drho.I.tot.npy'.format(opath), drho_I_tot)
+
+    np.save('{}/rho_0_orig.tot.spin-{:1d}.npy'.format(opath, ispin), rho_0_orig_tot)
+    np.save('{}/rho_0_fd.tot.spin-{:1d}.npy'.format(opath, ispin),rho_0_fd_tot)
+    np.save('{}/drho.P.tot.spin-{:1d}.npy'.format(opath, ispin), drho_P_tot)
+    np.save('{}/drho.I.tot.spin-{:1d}.npy'.format(opath, ispin), drho_I_tot)
 
 
 
