@@ -30,6 +30,12 @@ At the very beginning, we will perform a VASP frequency calculation with `IBRION
   1. Frequency analysis
   
       Now you can perform the frequency calculation with your VASP executable, or you can also just unpack `OUTCAR.comp.tgz` for a usable OUTCAR, which is required by the `genmode` module disscussed in the next step.
+      We also provide a tool for visualize the vibrational modes by using the program [MOLDEN](http://www.cmbi.ru.nl/molden). The following command
+      ```shell
+      $ python viewmode.py -i /path/to/freq/OUTCAR
+      ```
+      will generate the vibrational modes in the `MOLDEN` format, then you can select a vibrational mode by its frequency (in meV) and visualize it. Please note that the OpenGL version (`gmolden`) of `MOLDEN` might perform better on modern hardwares.
+      
 
   2. Generate dispalced geometry configurations
   
