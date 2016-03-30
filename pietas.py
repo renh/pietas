@@ -24,24 +24,20 @@ import numpy as np
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-i', '--input',
-                    help='Input file for configuration', default=None
-)
+                    help='Input file for configuration', default=None)
 
 parser.add_argument('-v', '--version',
-                    help='Version information', action='store_true'
-)
+                    help='Version information', action='store_true')
 
 parser.add_argument('-o', '--output',
-                    help='Oputput file', default='run.log'
-)
+                    help='Oputput file', default='run.log')
 
 parser.add_argument('-l', '--log',
                     help='Log verbosity level', type=int,
-                    default=20
-)
+                    default=20)
 
 args = parser.parse_args()
-#=================================================
+# =================================================
 
 logging.basicConfig(filename=args.output, level=args.log)
 
@@ -60,7 +56,7 @@ else:
             param = yaml.load(fh)
     except:
         raise IOError('can not load configuration file')
-#=================================================    
+# =================================================    
 
 #print(param)
 param['cutoff'] = float(param.get('cutoff'))
@@ -125,13 +121,13 @@ for i in range(len(kvec)):
         kvec[i,0], kvec[i,1], kvec[i,2], kweight[i]
     ))
 
-#=================================================    
+# =================================================    
 # real calculation starts here
 # all calculation will be conducted k-point wise,
 # I will prepare two set of variables to track the current and total quantities along with the loops.
 # loops over spinors and kpoints...
 # summation over kpts will be weighted by kweights
-#=================================================    
+# =================================================    
 #
 method = param.get('approximation')
 
