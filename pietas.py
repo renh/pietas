@@ -18,26 +18,26 @@ import finitediff
 import th
 import fileout
 import numpy as np
-#=================================================
+
 
 # parse arguments
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-i', '--input',
-                    help = 'Input file for configuration', default = None
+                    help='Input file for configuration', default=None
 )
 
 parser.add_argument('-v', '--version',
-                    help = 'Version information', action='store_true'
+                    help='Version information', action='store_true'
 )
 
 parser.add_argument('-o', '--output',
-                    help = 'Oputput file', default = 'run.log'
+                    help='Oputput file', default='run.log'
 )
 
 parser.add_argument('-l', '--log',
-                    help = 'Log verbosity level', type = int,
-                    default = 20
+                    help='Log verbosity level', type=int,
+                    default=20
 )
 
 args = parser.parse_args()
