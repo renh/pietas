@@ -8,6 +8,7 @@ import argparse
 import version
 import logging
 import sys
+import os
 import wavefunction as wf
 import checker
 import grid
@@ -132,7 +133,7 @@ for i in range(len(kvec)):
 method = param.get('approximation')
 
 opath = param.get('output path')
-if os.path.exists(opath):
+if not os.path.exists(opath):
     os.mkdir(opath)
 else:
     print("\n*******************************************************")
