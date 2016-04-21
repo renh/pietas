@@ -115,6 +115,15 @@ header += 'Cartesian\n'
 fname = '{}/scale.dat'.format(path)
 scale_fh = open(fname, 'w')
 
+# write un-displaced POSCAR
+m0_fname = '{}/POSCAR.mode0'.format(path)
+m0_fh = open(m0_fname, 'w')
+m0_fh.write(header)
+for i in range(NAtoms):
+    m0_fh.write('{:24.16f}{:24.16f}{:24.16f}\n'.format(*(X0[i])))
+m0_fh.close()
+
+
 # displacing coordinates
 print("\n\nGenerating displaced geometry:\n")
 for mode in modes:
