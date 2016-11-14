@@ -1,0 +1,429 @@
+\documentclass[a4paper,notitlepage,preprint]{revtex4-1}
+%\usepackage{fontspec}
+\usepackage{graphicx,epsfig,amsmath,bm,mathrsfs}
+\usepackage{listings,xcolor}
+\usepackage[
+pdfstartview=FitH,
+bookmarksnumbered=true,
+bookmarksopen=true,
+colorlinks=true,
+pdfborder=100,
+citecolor=blue]{hyperref}
+\bibliographystyle{apsrev}
+\usepackage{siunitx}
+\usepackage{mhchem}
+
+%\newfontfamily\listingsfont[Scale=0.7]{Courier New}
+\lstset{
+  basicstyle=\linespread{0.8}\ttfamily\footnotesize,
+  frame=single,numbers=left,  
+  keywordstyle=\color{blue},
+  commentstyle=\color{green},
+  morecomment=[l]{!\ }% Comment only with space after !
+}
+
+\newcommand\mbf{\mathbf}
+\newcommand\mrm{\mathrm}
+\newcommand\mca{\mathca}
+\newcommand\mcr{\mathscr}
+\newcommand{\ket}[1]{\vert #1\rangle}
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\inprod}[2]{\langle #1 \vert #2 \rangle}
+\newcommand{\matele}[3]{\langle #2 \vert #1 \vert #3 \rangle}
+
+\begin{document}
+
+
+\title{Normal mode analysis in VASP}
+
+
+\author{Hao Ren}
+\affiliation{Center for Bioengineering \& Biotechnology, China University of Petroleum (East China), Huangdao, Qingdao, China P. R. 266580}
+
+\date{\today}
+
+%\begin{abstract}
+
+%\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+Starting from VASP 4.5.x, the dynamical matrix can be calculated upon a relaxed configuration by using finite difference method with the input tag {\verb IBRION = 5}. Another option {\verb IBRION = 6} has been implemented since VASP 5.1.x, which only calculated the symmetry inequivalent displacements, and fill the reminder of the Hessian matrix using symmetry consideration. The tags {\verb IBRION = 7 or 8} implements the density functional perturbation theory, with symmetry unsupported or supported, respectively, also generates the Hessian matrix. But we will not consider this part of results currently.
+
+The scope of this document will confined in the parsing and interpretation of the vibrational information from VASP finite difference calculations ({\verb IBRION = 5 or 6}). We will start from the classical harmonic oscillator model for molecular vibrations, then discuss various conventions in the description of normal modes, followed by the dimensionless normal modes widely used in the vibration related calculations. The document ends up with a single water molecule in a cubic box as an example.
+
+\section{Normal modes and coordinates}
+
+\subsection{The small displacement problem}
+The total Hamiltonian for the nuclear motion in an $N$-atomic molecule is,
+\begin{equation}
+	H = \sum_{i=1}^{3N} \frac{1}{2}M_i \dot{x}_i^2 + V(x_1, x_2, \dots, x_{3N)}
+	\label{eq:H1}
+\end{equation}
+\noindent where $M_i$ is the mass of the $i$-th nucleus, $\{x_i\}$ denotes the 3N Cartesian coordinates of the nuclei, and the potential energy $V$ is a function of these coordinates. A small deformation $\{\Delta x_i\}$ from the equilibrium configuration $\{x_i^0\}$ results in small change in potential energy, which can be expanded as,
+\begin{equation}
+	V(x_1, x_2, \dots, x_N) = V(x_1^0, x_2^0, \dots, x_N^0) + \sum_{i=1}^{3N} \left.\frac{\partial V}{\partial x_i}\right\vert_0\Delta x_i + \sum_{i,j = 1}^{3N} \left. \frac{\partial^2 V}{\partial x_i \partial x_j} \right\vert_0 \Delta x_i \Delta x_j
+	\label{eq:Vexpand}
+\end{equation}
+\noindent By introducing a new set of variables $\{y_i\}$ labeling the change in the coordinates, 
+\begin{equation}
+	x_i \equiv x_i^0 + y_i
+	\label{eq:x_to_y}
+\end{equation}
+\noindent the kinetic term can be written as,
+\begin{equation}
+	T = \sum_{i=1}^{3N} \frac{1}{2}M_i \dot{y}_i^2
+	\label{eq:T}
+\end{equation}
+
+
+\noindent and taking the the potential energy at equilibrium as reference, as well as considering that the first order deviation vanishes at equilibrium, we have
+\begin{equation}
+	V(x_1, x_2, \dots, x_N) = \sum_{i,j = 1}^{3N}\left. \frac{\partial^2 V}{\partial y_i \partial y_j} \right\vert_0 y_i y_j
+	\label{eq:Vy}
+\end{equation}
+\noindent and the Hamiltonian,
+\begin{equation}
+	H =  \sum_{i=1}^{3N} \frac{1}{2}M_i \dot{y}_i^2 + \sum_{i,j = 1}^{3N}\left. \frac{\partial^2 V}{\partial y_i \partial y_j} \right\vert_0 y_i y_j
+	\label{eq:Hy}
+\end{equation}
+
+Now we introduce the matrix notations $\mbf{y}$ for the coordinates $\{y_i\}$, $\mbf{M}$ for the atomic masses, and $\mbf{F}$ for the second derivatives ,
+\begin{subequations}
+	\begin{equation}
+	(\mbf{y})_i = y_i
+	\end{equation}
+	\begin{equation}
+		(\mbf{M})_{ij} = M_i \delta_{ij}
+		\label{eq:Mm}
+	\end{equation}
+	\begin{equation}
+		(\mbf{F})_{ij} = \left. \frac{\partial^2 V}{\partial y_i \partial y_j} \right\vert_0
+		\label{eq:Fm}
+	\end{equation}
+	\label{eq:matrix1}
+\end{subequations}
+\noindent then we have,
+\begin{equation}
+	H = \frac{1}{2}\dot{\mbf{y}}^\top \mbf{M} \dot{\mbf{y}} + \frac{1}{2} \mbf{y}^\top\mbf{M}\mbf{y}
+	\label{eq:Hym}
+\end{equation}
+
+\subsection{Mass-weighted coordinates}
+Noting that there is a common $M$ term in both the kinetic and potential terms in Eq.~\ref{eq:Hym}, which can be reduced by introducing the mass-weighted coordinates,
+\begin{equation}
+	\xi_i = \sqrt{M_i}\,y_i \qquad \text{or} \qquad \mbf{y} = \mbf{A}\bm{\xi}
+	\label{eq:y_to_xi}
+\end{equation}
+\noindent where $\mbf{A}$ is a diagonal matrix with elements,
+\begin{equation}
+	(\mbf{A})_{ij} = \frac{1}{\sqrt{M_i}}\delta_{ij}
+	\label{eq:Amele}
+\end{equation}
+\noindent obviously we have,
+\begin{subequations}
+	\begin{equation}
+		\dot{\xi}_i = \sqrt{M_i}\, \dot{y}_i \qquad \text{or} \qquad \dot{\mbf{y}} = \mbf{A}\dot{\bm{\xi}}
+		\label{eq:xi}
+	\end{equation}
+	\begin{equation}
+		\begin{split}
+		\mbf{K}_{ij} = K_{ij} \equiv \left.\frac{\partial^2 V}{\partial \xi_i \partial\xi_j}\right\vert_0 &= \left.\frac{\partial^2 V}{\partial(\sqrt{M_i\,y_i}) \partial(\sqrt{M_j}\,y_j)}\right\vert_0 \\
+		&= \frac{1}{\sqrt{M_i}}\left.\frac{\partial^2 V}{\partial y_i \partial y_j}\right\vert_0 \frac{1}{\sqrt{M_j}} \\
+		&= (\mbf{A})_{ii}(\mbf{F})_{ij}(\mbf{A})_{jj} \\
+		&= \left(\mbf{A}^\top\mbf{FA}\right)_{ij}
+		\end{split}
+		\label{eq:2nd_deriv_V}
+	\end{equation}
+\end{subequations}
+\noindent then we can write the Hamiltonian as,
+\begin{equation}
+	H = \frac{1}{2}\dot{\bm\xi}^\top\dot{\bm\xi} + \frac{1}{2}\bm{\xi}^\top\mbf{K}\bm{\xi}
+	\label{eq:Hxi}
+\end{equation}
+\noindent Note that the mass matrix $\mbf{M}$ in the kinetic term in Eq.~(\ref{eq:Hym}) has been eliminated in  Eq.~(\ref{eq:Hxi}).
+
+\subsection{Normal coordinates}
+By examining Eq.~(\ref{eq:2nd_deriv_V}), we found that the second derivative matrix $\mbf{K}$ involves cross terms that correlates the $i$-th and $j$-th degrees of freedom. Now we try to disentangle this correlation over different atomic displacements. Consider a unitary transformation to the mass-weighted coordinates $\{\xi_i\}$,
+\begin{equation}
+	\bm{\xi} = \mbf{B}\mbf{q}
+	\label{eq:xi_to_q}
+\end{equation}
+\noindent where $\mbf{B}$ is a unitary matrix,
+\begin{equation}
+	\mbf{B}^\top = \mbf{B}^{-1}
+	\label{eq:B}
+\end{equation}
+\noindent then the potential term can be written as,
+\begin{equation}
+	\begin{split}
+	V = \frac{1}{2} \bm{\xi}^\top \mbf{K}\bm{\xi} &= \frac{1}{2} (\mbf{Bq})^\top \mbf{KBq} \\
+	&= \frac{1}{2}\mbf{q}^\top\mbf{B}^\top \mbf{KBq} \\
+	&= \frac{1}{2}\mbf{q}^\top(\mbf{B}^\top\mbf{KB})\mbf{q} \\
+	&= \frac{1}{2}\mbf{q}^\top\bm{\Lambda}\mbf{q} 
+	\end{split}
+	\label{eq:V_Bq}
+\end{equation}
+\noindent here $\bm\Lambda$ is the unitary transformation of $\mbf{K}$,
+\begin{equation}
+	\bm\Lambda = \mbf{B}^\top\mbf{KB}
+	\label{eq:Lambda}
+\end{equation}
+
+Since $\mbf{K}$ is symmetric, we can always find a unitary matrix to make it diagonal. The columns of this unitary matrix is the eigenvectors of $\mbf{K}$. If we select $\mbf{B}$ to be this unitary matrix, then the matrix $\bm\Lambda$ is diagonal,
+\begin{equation}
+	(\bm\Lambda)_{ij} = \lambda_i\delta_{ij}
+	\label{eq:lambda}
+\end{equation}
+\noindent and the potential will be a sum of terms with each only involving a single transformed coordinate $q_i$,
+\begin{equation}
+	\begin{split}
+	H &= \frac{1}{2}\dot{\mbf{q}}^\top\dot{\mbf{q}} + \frac{1}{2}\mbf{q}^\top \bm{\Lambda}\mbf{q} \\
+	&= \sum_{i=1}^{3N} \left( \frac{1}{2} \dot{q}_i^2 + \frac{1}{2}\lambda_i q_i^2\right)
+	\end{split}
+	\label{eq:Hmq}
+\end{equation} 
+This new set disentangled coordinates $\{q_i\}$ obtained by unitary transformation~(\ref{eq:xi_to_q}) is called {\em normal coordinates}.
+
+In the eigenvalue problem,
+\begin{equation}
+	\mbf{KB} = \mbf{B}\bm\Lambda
+	\label{eq:eig}
+\end{equation}
+\noindent the eigenvectors in $\mbf{B}$ are the linear combination coefficients of the linear transformation from $\{y_i\}$ to $\{\xi_i\}$, which is dimensionless. The matrix $\mbf{K}$ and eigenvalue matrix $\bm\Lambda$ have the same dimension,
+\begin{equation}
+	[\bm\Lambda] = \left[\mbf{K}\right] = \left[\mbf{A}^\top \mbf{FA}\right] = \frac{1}{M}\left[\frac{\partial^2 V}{\partial y_i \partial y_j}\right] = \frac{1}{M} \frac{MLT^{-2}}{L^2} = T^{-2}
+	\label{eq:lambda_dimension}
+\end{equation}
+\noindent here $M$, $L$, and $T$ represent the dimensions of mass, length, and time, respectively. It is obvious that $\bm\Lambda$ (or $\lambda_i$) has the dimension corresponds to squared frequency. Indeed, the vibrational frequency can be evaluated by
+\begin{equation}
+	\omega_i = \sqrt{\lambda_i}
+	\label{eq:freq}
+\end{equation}
+\noindent Note that $\omega_i$ is the angular frequency of the $i$-th vibrational mode, which can be related to the frequency $\nu_i$ by,
+\begin{equation}
+	\nu_i = \frac{\omega_i}{2\pi} = \frac{\sqrt{\lambda_i}}{2\pi}
+	\label{eq:freq2pi}
+\end{equation}
+\noindent the Hamiltonian for the $i$-th mode can then be written as,
+\begin{equation}
+	H_i = \frac{1}{2}\dot{q}_i^2 + \frac{1}{2}\omega_i^2 q_i^2
+	\label{eq:Hqomega}
+\end{equation}
+
+\subsection{The quantum harmonic oscillator}
+Now we turn to the quantum description of small displacements. By mapping the momentum and postion variables to operators,
+\begin{subequations}
+	\begin{alignat}{2}
+	p_i &\rightarrow \hat{p}_i = \mrm{i}\hbar \frac{\partial}{\partial x_i} \\
+	x_i &\rightarrow \hat{x}_i = x_i
+	\end{alignat}
+\label{eq:var_to_op}
+\end{subequations}
+{\noindent}we can see that the potential part of the Hamiltonian in the quantum framework is the same to its classical counterpart,
+\begin{equation}
+	\mcr{V} = \sum_{i=1}^{3N} \frac{1}{2}\omega_i^2 q_i^2
+	\label{eq:V_q_q}
+\end{equation}
+
+However, a little algebra is required for the correct form of the kinetic part. With the atomic coordinates $\{x_i\}$, the kinetic energy operator is,
+\begin{equation}
+	\mcr{T} = \sum_{i=1}^{3N} \frac{\hat{p}_i^2}{2M_i} = -\sum_{i=1}^{3N} \frac{\hbar^2}{2M_i}\frac{\partial^2}{\partial x_i^2}
+	\label{eq:T_q_x}
+\end{equation}
+\noindent By transforming $\{x_i\}$ to $\{y_i\}$ using Eq.~(\ref{eq:x_to_y}) and taking the atomic units ({\it i.e.} $\hbar = 1$) we have,
+\begin{equation}
+	\mcr{T} = -\sum_{i=1}^{3N}\frac{1}{2M_i}\frac{\partial^2}{\partial y_i^2}
+	\label{eq:T_q_y}
+\end{equation}
+\noindent then using Eq.~(\ref{eq:y_to_xi}),
+\begin{equation}
+	\begin{split}
+		\mcr{T} &= -\sum_{i=1}^{3N} \frac{1}{2M_i} \frac{\partial^2}{\partial (\frac{1}{\sqrt{M_i}}\xi_i)^2} \\
+		&= -\sum_{i=1}^{3N}\frac{1}{2}\frac{\partial^2}{\partial\xi_i^2}
+	\end{split}
+	\label{eq:T_q_xi}
+\end{equation}
+\noindent and finally taking the unitary transformation~(\ref{eq:xi_to_q}),
+\begin{equation}
+	\begin{split}
+		\mcr{T} &= -\sum_{i=1}^{3N}\frac{1}{2} \frac{\partial^2}{\partial (\sum_j B_{ij}q_j)^2} \\
+		&= -\sum_j \frac{1}{2}\frac{\partial^2}{\partial q_j^2}
+	\end{split}
+	\label{eq:T_q_q}
+\end{equation}
+\noindent since $\mbf{B}\mbf{B}^\top = \mbf{1}$. Then we have the quantum mechanical Hamiltonian of the oscillator,
+\begin{equation}
+	\mcr{H} = \mcr{T} + \mcr{V} = -\sum_{i=1}^{3N}\frac{1}{2}\frac{\partial^2}{\partial q_i^2} + \sum_{i=1}^{3N} \frac{1}{2}\omega_i^2 q_i^2
+	\label{eq:Hq}
+\end{equation}
+
+\subsection{Dimensionless normal mode}
+A question arises from the finite-difference calculation of many physical quantities is, how much should we deform the geometry configuration along a specified vibrational mode from the equilibrium corresponds to {\bf one unit} of this mode? The unit length of a vibrational mode can be clarified by considering the {\em dimensionless normal mode}.
+
+First let's have a look at the Schr\"odinger equation of a harmonic oscillator with mass $m = 1$ and angular frequency $\omega = 1$,
+\begin{equation}
+	\omega\left(-\frac{1}{2}\frac{\partial^2}{\partial Q^2} + \frac{1}{2}Q^2\right) \psi_n(Q) = \left(n+\frac{1}{2}\right)\omega\psi_n(Q)
+	\label{eq:SEq}
+\end{equation}
+\noindent where the vibrational wave functions and energies are independent of the mass and frequency. In other words, we selected the dimension of $Q$ that makes the eigenenergies in units of $\omega$ (or $\hbar\omega$). To draw an analogy between the problem we faced and Eq.~(\ref{eq:SEq}), we make a trail transformation,
+\begin{equation}
+	q_i = c_i Q_i
+	\label{eq:q_to_Q1}
+\end{equation}
+\noindent where $c_i$ is a constant for each normal modes that would eliminate the dimension of Eq.~(\ref{eq:Hq}), now the Hamiltonian for the $i$-th normal mode is,
+\begin{equation}
+	\begin{split}
+	\mcr{H}_i &= -\frac{1}{2}\frac{\partial^2}{\partial q_i^2} + \frac{1}{2}\omega_i^2 q_i^2 \\
+	&= -\frac{1}{2}\frac{\partial^2}{\partial\left(c_i Q_i\right)^2} + \frac{1}{2}\omega_i^2\left(c_i Q_i\right)^2 \\
+	&=\frac{1}{c_i^2}\left(-\frac{1}{2}\frac{\partial^2}{\partial Q_i^2}\right) + c_i^2 \omega_i^2 \left(\frac{1}{2}Q_i^2\right)
+	\end{split}
+	\label{eq:HQ}
+\end{equation}
+\noindent Comparing Eq.~(\ref{eq:HQ}) with Eq.~(\ref{eq:SEq}), we note that the wave functions and energies would be dimensionless if we choose
+\begin{equation}
+	\frac{1}{c_i^2} = c_i^2\omega_i^2
+	\label{eq:dim_trans}
+\end{equation}
+\noindent which leads to
+\begin{equation}
+	c_i = \frac{1}{\sqrt{\omega_i}}
+	\label{eq:c}
+\end{equation}
+\noindent and
+\begin{equation}
+	Q_i = \sqrt{\omega_i}q_i
+	\label{eq:q_to_Q}
+\end{equation}
+\noindent or in matrix form,
+\begin{equation}
+	{\mbf Q} = \mbf{W}^{1/2}\mbf{q}
+	\label{eq:M_q_to_Q}
+\end{equation}
+\noindent where the frequency matrix $\mbf{W}$ is diagonal with elements,
+\begin{equation}
+	(\mbf{W})_{ij} = \omega_i\delta_{ij}
+	\label{eq:Wele}
+\end{equation}
+
+To summarise the transformations among various coordinates mentioned above, we collect Eqs.~(\ref{eq:y_to_xi}), (\ref{eq:xi_to_q}) and (\ref{eq:M_q_to_Q}),
+\begin{equation}
+	\mbf{y} = \mbf{A}\bm{\xi} = \mbf{A}\mbf{B}\mbf{q} = \mbf{A}\mbf{B}\mbf{W}^{-1/2}\mbf{Q}
+	\label{eq:Q_to_y}
+\end{equation}
+\noindent thus we can construct the deformation along each normal mode $\mbf{y}$ (or $\{y_i\}$) with specified amount in unit $\mbf{Q}$ (or $\{Q_i\}$).
+
+\section{Construct deformation from VASP dynamical matrix}
+\subsection{Data location}
+There are two files that VASP outputs the system configurations and calculation details, \verb|OUTCAR| and \verb|vasprun.xml|. The former one includes human-friendly formatted information about almost all the details of the current calculation, but sometimes numerical precision is sacrificed for human readability. On the other hand, the \verb|vasprun.xml| file is written in the XML language, which is more structured and usually has higher precision by preserving more significant digits. For example, the eigenvalues of the hessian matrix in the \verb|OUTCAR| is written with \verb|%12.6f| (I use the C style formmat here); but in \verb|vasprun.xml|, the same values have a format of \verb|%16.8E|, where the scientific notation preserves much higher precision, especially for very small numbers usually encountered in the Hessian matrix and its eigenvalues/eigenvectors.
+
+I will figure out where can we find the dynamical matrix (Hessian) and its eigenvectors in both the two files,
+\begin{itemize}
+	\item \verb|OUTCAR|. In the \verb|OUTCAR| file, the keyword for the dynamical matrix is
+	\begin{verbatim}
+		^ SECOND DERIVATIVES (NOT SYMMETRIZED)		
+	\end{verbatim}
+	where the circumflex character ``\verb|^|'' denotes the start of line. The following $N_D+2$ lines contains the table-formatted dynamical matrix, here $N_D$ is the degree of freedom in the finite difference calculation (usually equals to the number of coordinates allowed to move by \verb|Selective Dynamics|). Note that the dynamical matrix reported here is the ``real'' second derivatives of potential energy with respect to Cartesian coordinates directly evaluated from the finite difference procedure. We must manually symmetrize it for diagonalization, otherwise it's not guaranteed can be diagonalized.
+	
+	The eigenvectors and eigenvalues are written just following the dynamical matrix section, starts from the keyword
+	\begin{verbatim}
+		^ Eigenvectors and eigenvalues of the dynamical matrix
+	\end{verbatim}
+	where the information is self-explained.
+	
+	\item \verb|vasprun.xml|. All the vibration related information is stored in the element
+	\begin{verbatim}
+		/modeling/calculation/dynmat
+	\end{verbatim}
+	where this \verb|calculation| element is the last of the several elements with the same name. There are three sub-elements in \verb|dynmat|: one \verb|varray| with tag \verb|name="hessian"| has $N_D$ children \verb|v|, each contains the {\em column} vector of the dynamical matrix; one \verb|v| with tag \verb|name="eigenvalues"| contains the $N_D$ eigenvalues, in ascending order; and another \verb|varray| with tag \verb|name="eigenvectors"| also has $N_D$ children \verb|v| each contains one eigenvector, the order of eigenvectors are the same to that of eigenvalues.
+\end{itemize}
+
+{\color{red} {\bf Note 1:}} The data locations discussed above works with VASP 5.x. There are slightly difference in the versions 4.6.x. In particular, by default, VASP 4.6.x will write two version of eigenvectors in the \verb|OUTCAR|, one is the direct eigenvector, and the other is eigenvectors divided by \verb|SQRT(M)|, which represents the NOT mass-weighted cartesian normal coordinates. The keywords in the \verb|OUTCAR| is clear enough, just be careful not miss up.
+\vspace{1em}
+
+{\color{red} {\bf Note 2:}} The eigenvalues and eigenvectors can either be obtained by direct parsing \verb|OUTCAR| or \verb|vasprun.xml|, or diagonalize by ourselves. However, since we lose numerical precision by converting from binary data to decimal digits, all data parsed is an approximation to the exact values in the VASP system. In practice, the difference between parsed eigenvalues/eigenvectors and the manually diagonalized ones is negligible. I tend to use the parsed values, and that is what I did in the code.
+\vspace{1em}
+
+Apart from the above two files, we can also hack the \verb|finite_diff.F| module to directly write out the Hessian, normal modes, and frequencies in any format we want, if necessary. 
+
+There are several advantages for parsing data from the XML version output compared with parsing from \verb|OUTCAR|, such as
+\begin{enumerate}
+	\item Losses less numerical precision, as mentioned above.
+	\item There exists tremendous implementations to parse XML files that can be invoked painlessly by popular programming languages. Usually more robust and efficient.
+	\item XML is a standard format for data transfer/exchange, it might be easier to develop interface for other codes.
+\end{enumerate} 
+
+\subsection{The sign of dynamical matrix}
+If diagonalise the dynamical matrix directly, we would obtain $3N-6$ negative eigenvalues, for an optimised nonlinear system, here $N$ denotes the number of atoms. This is the consequence of the fact that VASP calculate the second derivatives by directly take the sum of the difference in forces each ion experienced between the equilibrium and deformed configurations. Since
+\begin{equation}
+	F_i = - \frac{\partial V}{\partial x_i}
+	\label{eq:FV}
+\end{equation}
+\noindent the minus sign then transfered by summation. In fact, VASP calculates the vibrational frequency $\omega$ by the following code,
+\begin{lstlisting}[language=Fortran,firstnumber=1318]
+	W=FACTOR*SQRT(ABS(EVAL(N)))
+\end{lstlisting}
+\noindent where \verb|W|, \verb|EVAL| are the variable names of frequency (in Hz) and eigenvalues, respectively. \verb|FACTOR| is the conversion constant from the units VASP uses ({\AA}ngstr\"om, eV, etc.) to SI units.
+
+\subsection{Interpretation of data}
+The dynamical matrix parsed from the (VASP 5.x) files \verb|OUTCAR| or \verb|vasprun.xml| VASP are the second derivatives divided by $\sqrt{M_i M_j}$, as shown in the following code (around line 260 in \verb|finite_diff.F|),
+\begin{lstlisting}[language=Fortran,firstnumber=259]
+    N=1
+    DO I=1,NTYP
+      DO J=1,NITYP(I)
+        DO K=1,3
+          CALL FIND_DOF_INDEX(NIONS,LSFOR,LSDYN,K,N,M)
+          IF (M>0) SECOND_DERIV(:,M)=SECOND_DERIV(:,M)/SQRT(MASSES(I))
+          IF (M>0) SECOND_DERIV(M,:)=SECOND_DERIV(M,:)/SQRT(MASSES(I))
+        END DO
+        N=N+1
+      END DO
+    END DO
+\end{lstlisting}
+\noindent thus the dynamical matrix we parsed from VASP output is just the (negative) mass-weighted Hessian matrix $\mbf{K}$ in Eq.~(\ref{eq:2nd_deriv_V}), and the eigenvectors are the column vectors of the unitary matrix $\mbf{B}$. 
+
+\subsection{Generate unit deformation along normal modes}
+Recall Eq.~(\ref{eq:Q_to_y}), the required quantities to generate unit deformation (or specified amount of deformation in unit $\mbf{Q}$) along a normal mode $Q_i$ are: the matrices $\mbf{A}$, $\mbf{B}$, and $\mbf{W}$. We can collect the transformation matrices as $\mbf{Z}$,
+\begin{equation}
+	\mbf{Z} = \mbf{AB}\mbf{W}^{-1/2}
+	\label{eq:Z}
+\end{equation}
+and the Cartesian displacements can be obtained by converting the dimensionless normal mode $\mbf{Q}$ to $\mbf{y}$,
+\begin{equation}
+	\mbf{y} = \mbf{ZQ}
+	\label{eq:Q_to_y_tot}
+\end{equation}
+
+Currently we have parsed $\mbf{B}$. The frequency matrix $\mbf{W}$ can be evaluated as the square root of the eigenvalues ($\bm{\Lambda}$) of $\mbf{K}$. Note that $\bm{\Lambda}$ is in unit \SI{}{\electronvolt\per\atomicmassunit\per\angstrom\tothe{2}}, here \SI{}{\atomicmassunit} is the atomic mass unit (AMU) with the value of one twelfth of \ce{^{12}C} nuclear mass. The atomic masses matrix $\mbf{A}$ can be obtained by parsing the element \verb|/modeling/atominfo/atomtypes/set| in \verb|vasprun.xml|, also in AMU.
+
+We have established the relation between the dimensionless normal mode $\mbf{Q}$ and the Cartesian displacement $\mbf{y}$, and found all the required components to construct the transformation matrix $\mbf{Z}$. However, the units of each matrix should be unified to perform real calculations. As an example, if we need the Cartesian displacements in atomic units, we can convert all the matrices into atomic unit, for $\mbf{A}$
+\begin{subequations}
+	\begin{equation}
+		\mbf{A} \rightarrow \left(\frac{1}{\mrm{AMU2AU}}\right)^{1/2}\mbf{A}
+		\label{eq:A_conv}
+	\end{equation}
+	\noindent where $\mrm{AMU2AU} = 1822.888486$ is the atomic mass unit (Dalton) in atomic unit (static electron mass); for $\mbf{B}$,
+	\begin{equation}
+		\mbf{B} \rightarrow \mbf{B}
+		\label{eq:B_conv}
+	\end{equation}
+	\noindent since $\mbf{B}$ just contains a series of linear combination coefficients, which is dimensionless; for $\mbf{W}$,
+	\begin{equation}
+		\mbf{W} \rightarrow \left(\frac{\mrm{eV2Ha}}{\mrm{Ang2Bohr}^2\cdot \mrm{AMU2AU}}\right)^{1/2}\mbf{W}
+		\label{eq:W_conv}
+	\end{equation} 
+	\label{eq:unit_conversion}
+\end{subequations}
+\noindent $\displaystyle \mrm{eV2Ha} = \frac{1}{27.211652}$ is electron volt in Hartree, and $\displaystyle \mrm{Ang2Bohr} = \frac{1.0}{0.529177249}$ is {\AA}ngstr\"om in Bohr. Collect the conversion constants in Eq.~(\ref{eq:unit_conversion}), we have
+\begin{equation}
+	\mbf{y} = \left(\frac{27.211652}{0.529177249^2 \times 1822.888486}\right)^{1/4} \mbf{AB}\bm{\Lambda}^{1/4}\mbf{Q}
+	\label{eq:final}
+\end{equation}
+\noindent where $\mbf{A}$, $\mbf{B}$, and $\bm{\Lambda}$ taking the values directly parsed from VASP output, and the obtained $\mbf{y}$ has unit Bohr.
+
+
+
+%\bibliography{background.bib}
+
+\end{document}

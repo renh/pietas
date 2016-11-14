@@ -1,3 +1,6 @@
+# mac OS related
+*.DS_Store
+
 # python
 *.py[cod]
 
@@ -37,3 +40,10 @@ n0.*/
 # viewmodes outputs
 *.mol
 
+# Latex
+doc/normal_mode/.normalmode.lb
+doc/normal_mode/missfont.log
+doc/normal_mode/normalmode.aux
+doc/normal_mode/normalmode.log
+doc/normal_mode/normalmode.out
+doc/normal_mode/normalmode.synctex.gz
