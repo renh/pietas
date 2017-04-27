@@ -28,42 +28,42 @@ class WAVECAR:
             IOError if can not open WAVECAR file.
             ValueError if inconsistent record/message read.
         """
-        self.__fname = fnm
+        self._fname = fnm
 
         try:
-            self.__fh = open(self.__fname, 'rb')
+            self._fh = open(self._fname, 'rb')
         except:
-            raise IOError("Failed open wavefunction file: {}".format(self.__fname))
+            raise IOError("Failed open wavefunction file: {}".format(self._fname))
 
-        self.__recl, self.__nspin, self.__tag = self.read_tag()
+        self._recl, self._nspin, self._tag = self.read_tag()
 
-        self.__prec = self.setWFPrec()
+        self._prec = self.setWFPrec()
 
-        self.__nk, self.__nb, self.__Ec, self.__a = self.read_rec2()
-        self.__Omega = self.getOmega()
-        self.__b = self.getRecipLatt()
-        self.__ngmax = self.getNGMax()
+        self._nk, self._nb, self._Ec, self._a = self.read_rec2()
+        self._Omega = self.getOmega()
+        self._b = self.getRecipLatt()
+        self._ngmax = self.getNGMax()
 
         # will not initialize overlap matrix
         # explicitly call obj.calOverlap() for the whole matrix 
         # self.S = self.calcOverlap()
 
-    def getRECL(self):      return self.__recl
-    def getNSpin(self):     return self.__nspin
-    def getTag(self):       return self.__tag
-    def getPrec(self):      return self.__prec
-    def getNKpts(self):     return self.__nk
-    def getNBands(self):    return self.__nb
-    def getENMax(self):     return self.__Ec
-    def getRealLatt(self):  return self.__a
-    def getNGMax(self):     return self.__ngmax
+    def getRECL(self):      return self._recl
+    def getNSpin(self):     return self._nspin
+    def getTag(self):       return self._tag
+    def getPrec(self):      return self._prec
+    def getNKpts(self):     return self._nk
+    def getNBands(self):    return self._nb
+    def getENMax(self):     return self._Ec
+    def getRealLatt(self):  return self._a
+    def getNGMax(self):     return self._ngmax
     
     
         
     def read_tag(self):
         'Read WAVECAR header for recl, nspin, and tag'
-        self.__fh.seek(0)
-        rrecl, rispin, rtag = np.fromfile(self.__fh,dtype=np.float, count=3)
+        self._fh.seek(0)
+        rrecl, rispin, rtag = np.fromfile(self._fh,dtype=np.float, count=3)
         return int(rrecl), int(rispin), int(rtag)
 
     
@@ -74,25 +74,25 @@ class WAVECAR:
             TAG = 45200: single precision complex, np.complex64, or complex(qs)
             TAG = 45210: double precision complex, np.complex128, or complex(q)
         '''
-        if self.__tag == 45200:
+        if self._tag == 45200:
             return np.complex64
-        elif self.__tag == 45210:
+        elif self._tag == 45210:
             return np.complex128
-        elif self.__tag == 53300:
+        elif self._tag == 53300:
             raise ValueError("VASP5 WAVECAR format, not implemented yet")
-        elif self.__tag == 53310:
+        elif self._tag == 53310:
             raise ValueError("VASP5 WAVECAR format with double precision "
                           +"coefficients, not implemented yet")
         else:
-            raise ValueError("Invalid TAG values: {}".format(self.tag))
+            raise ValueError("Invalid TAG values: {}".format(self._tag))
 
     def read_rec2(self):
         '''Read rec #2, length 12, with real(q) or double precision:
             #1 - #3: nkpts, nbands, E cutoff
             #4 - #12: lattice vector (real space)
         '''
-        self.__fh.seek(self.__recl)
-        rec = np.fromfile(self.__fh, dtype=float, count=12)
+        self._fh.seek(self._recl)
+        rec = np.fromfile(self._fh, dtype=float, count=12)
         nk, nb, Ec = int(rec[0]), int(rec[1]), rec[2]
         a = np.reshape(rec[3:],[3,3])
         return nk, nb, Ec, a
@@ -102,17 +102,17 @@ class WAVECAR:
         Calculate the supercell volume
             Omega = a0 \dot (a1 \cross a2)
         '''
-        return np.dot(self.__a[0], np.cross(self.__a[1], self.__a[2]))
+        return np.dot(self._a[0], np.cross(self._a[1], self._a[2]))
 
     def getRecipLatt(self):
         '''Calculate the reciprocal lattice vectors.
         a_i \dot b_j = 2 \pi \delta_{ij}
         '''
         b = np.zeros([3,3])
-        b[0] = np.cross(self.__a[1], self.__a[2])
-        b[1] = np.cross(self.__a[2], self.__a[0])
-        b[2] = np.cross(self.__a[0], self.__a[1])
-        b *= (2.0 * PI / self.__Omega)
+        b[0] = np.cross(self._a[1], self._a[2])
+        b[1] = np.cross(self._a[2], self._a[0])
+        b[2] = np.cross(self._a[0], self._a[1])
+        b *= (2.0 * PI / self._Omega)
         return b
 
     def getNGMax(self):
@@ -121,15 +121,15 @@ class WAVECAR:
         ngmax = []
         lb = np.zeros(3)
         for i in range(3):
-            lb[i] = np.linalg.norm(self.__b[i])
+            lb[i] = np.linalg.norm(self._b[i])
         #Ec_sqrt = np.sqrt(self.Ec*Const)
-        Ec_sqrt = np.sqrt(self.__Ec / RYTOEV) / AUTOA
+        Ec_sqrt = np.sqrt(self._Ec / RYTOEV) / AUTOA
         ind = collections.deque([0,1,2])
         for i in range(3):
             ind.rotate(i)
-            b0 = self.__b[ind[0]]; lb0 = lb[ind[0]]
-            b1 = self.__b[ind[1]]; lb1 = lb[ind[1]]
-            b2 = self.__b[ind[2]]; lb2 = lb[ind[2]]
+            b0 = self._b[ind[0]]; lb0 = lb[ind[0]]
+            b1 = self._b[ind[1]]; lb1 = lb[ind[1]]
+            b2 = self._b[ind[2]]; lb2 = lb[ind[2]]
             phi = abs(np.arccos(np.dot(b0,b1) / (lb0 * lb1)))
             sin_phi = abs(np.sin(phi))
             v = np.cross(b0, b1)
@@ -155,17 +155,17 @@ class WAVECAR:
         Raises:
             raise ValueError for invalid ispin or ik values
         '''
-        if ispin >= self.__nspin:
+        if ispin >= self._nspin:
             raise ValueError("ISPIN in WAVECAR: {};\t ispin to be read: # {}".format(
-                self.__nspin, ispin+1
+                self._nspin, ispin+1
             ))
-        if ik >= self.__nk:
+        if ik >= self._nk:
             raise ValueError("#kpts in WAVECAR: {}; \t ik to be read: # {}".format(
-                self.__nk, ik+1
+                self._nk, ik+1
             ))
         irec = 2
-        irec += ispin * self.__nk * (self.__nb + 1)
-        irec += ik * (self.__nb + 1)
+        irec += ispin * self._nk * (self._nb + 1)
+        irec += ik * (self._nb + 1)
         #print("\nRecord for spin #{} and kpt #{} located: IREC = {}".format(
         #    ispin, ik, irec+1
         #))
@@ -186,8 +186,8 @@ class WAVECAR:
             None
         '''
         irec = self.locateREC(ispin, ik)
-        self.__fh.seek(self.__recl * irec)
-        dump = np.fromfile(self.__fh, dtype=float, count = 4+3*self.__nb)
+        self._fh.seek(self._recl * irec)
+        dump = np.fromfile(self._fh, dtype=float, count = 4+3*self._nb)
         nplw = int(dump[0])
         kvec = np.array(dump[1:4])
         tmp = np.reshape(dump[4:], [-1,3])
@@ -198,7 +198,7 @@ class WAVECAR:
     
     def readBandsCoeffK(self, ispin = 0, ik = 0):
         '''
-        Read wave function info for specified spin (def 0) and k-point (def 0)
+        Read wave function info for specified spin and k-point 
         Args: 
             ispin  : int, spin index
             ik     : int, kpt index
@@ -218,8 +218,8 @@ class WAVECAR:
 
         # no matter what prec used in WAVCAR, we use double precision (complex128)
         # to operate the wavefunctions.
-        bands = np.zeros([self.__nb, nplw], dtype=np.complex128)
-        for ib in range(self.__nb):
+        bands = np.zeros([nb, nplw], dtype=np.complex128)
+        for ib in range(nb):
             bands[ib] = self.readBandCoeff(ispin, ik, ib)
 
         print("Wavefunctions with spin {} and kpt {} read".format(
@@ -241,22 +241,18 @@ class WAVECAR:
 
         '''
         irec = self.locateREC(ispin, ik)
-        self.__fh.seek(self.__recl*irec)
-        dump = np.fromfile(self.__fh, dtype=float, count=1)
+        self._fh.seek(self._recl*irec)
+        dump = np.fromfile(self._fh, dtype=float, count=1)
         nplw = int(dump)
 
         irec += 1
         irec += ib
-        self.__fh.seek(self.__recl*irec)
-        coeff = np.fromfile(self.__fh, dtype=self.__prec, count=nplw)
+        self._fh.seek(self._recl*irec)
+        coeff = np.fromfile(self._fh, dtype=self._prec, count=nplw)
 
         # expand coefficients into double precision complex and re-normalize if required
         coeff = np.array(coeff, dtype = np.complex128)
 
-        if normalize:
-            dump = np.dot(np.conj(coeff), coeff)
-            coeff /= np.sqrt(dump)
-        
         return coeff
 
 
@@ -279,24 +275,24 @@ class WAVECAR:
         kvec = dump[1]
         print("Preparing GVEC for kvec:", kvec)
         const = 1.0 / RYTOEV / AUTOA2
-        Ec = self.__Ec * const
+        Ec = Ec * const
         GVEC = []
-        for k in range(2*self.__ngmax[2]+1):
+        for k in range(2*ngmax[2]+1):
             igz = k
-            if igz > self.__ngmax[2]:
-                igz = k - 2 * self.__ngmax[2] - 1
-            for j in range(2*self.__ngmax[1]+1):
+            if igz > ngmax[2]:
+                igz = k - 2 * ngmax[2] - 1
+            for j in range(2*ngmax[1]+1):
                 igy = j
-                if igy > self.__ngmax[1]:
-                    igy = j - 2 * self.__ngmax[1] - 1
-                for i in range(2*self.__ngmax[0]+1):
+                if igy > ngmax[1]:
+                    igy = j - 2 * ngmax[1] - 1
+                for i in range(2*ngmax[0]+1):
                     igx = i
-                    if igx > self.__ngmax[0]:
-                        igx = i - 2 * self.__ngmax[0] - 1
+                    if igx > ngmax[0]:
+                        igx = i - 2 * ngmax[0] - 1
                     G = np.array([igx, igy, igz])
                     dump = (G + kvec).reshape(1,-1)
                     #print(dump.shape)
-                    sumkg = np.dot(dump, self.__b)
+                    sumkg = np.dot(dump, b)
                     #print(sumkg.shape)
                     #print(sumkg)
                     #raise SystemExit
@@ -330,7 +326,7 @@ class WaveFunction:
     describe the wavefunction (pseudo and all-electron) for specified spin and kpt indices.
     usage: WaveFunction(WAVECAR, ispin, ik)
     """
-    def __init__(self, WAVECAR, ispin = 0, ik = 0, normalize=False):
+    def __init__(self, WAVECAR, ispin = 0, ik = 0):
         """
         Initializer for class WaveFunction.
         Args:
@@ -342,108 +338,113 @@ class WaveFunction:
         Raises:
             None
         """
-        self.__normalize = normalize
-        self.__WC = WAVECAR
-        self.__nb = self.__WC.getNBands()
-        self.__ispin = ispin
-        self.__ik = ik
-        self.__nplw, self.__kvec, self.__eig, self.__FermiW = self.readKHeader()
-        self.__wps = self.readWPS()
+        self._WC = WAVECAR
+        self._nb = self._WC.getNBands()
+        self._ispin = ispin
+        self._ik = ik
+        self._nplw, self._kvec, self._eig, self._FermiW = self.readKHeader()
+        self._wps = self.readWPS()
         
 
         
-    def getWPS(self): return self.__wps
-    def getNPlw(self): return self.__nplw
-    def getKVec(self): return self.__kvec
-    def getEig(self): return self.__eig
-    def getFermiW(self): return self.__FermiW
+    def getWPS(self): return self._wps
+    def getNPlw(self): return self._nplw
+    def getKVec(self): return self._kvec
+    def getEig(self): return self._eig
+    def getFermiW(self): return self._FermiW
 
     def readKHeader(self):
-        kheader = self.__WC.readKHeader(self.__ispin, self.__ik)
+        kheader = self._WC.readKHeader(self._ispin, self._ik)
         nplw, kvec, eig, FermiW = kheader
         return nplw, np.array(kvec), np.array(eig), np.array(FermiW)
     
     def readWPS(self):
-        WC = self.__WC
-        nb = self.__nb
-        nplw = self.__nplw
+        WC = self._WC
+        nb = self._nb
+        nplw = self._nplw
         wps = np.zeros([nb, nplw], dtype=np.complex128)
         for ib in range(nb):
-            wps[ib] = WC.readBandCoeff(self.__ispin, self.__ik, ib, normalize=self.__normalize)
+            wps[ib] = WC.readBandCoeff(self._ispin, self._ik, ib)
         return wps
 
-    def getOverlap(self):
-        nb = self.__nb
-        wps = self.__wps
-        S = np.dot(
-            np.conj(wps), wps.T
-        )
-        return S
-
-    def getWMatrix(self, tol):
-        """
-        Construct the occupation number diagonal matrix.
-            Small occupation numbers will be replaced by a small cutoff value tol, to bypass
-            possible numerical problems due to linear dependence.
-            see Szabo, "Modern Quantum Chemistry", Sec. 3.4.5 for details.
-        """
-        W = np.array([max(tol, x) for x in self.__FermiW])
-        return np.diag(W)
-
-    def getOrthMatrix(self, OccWeighted, tol):
-        """
-        Construct the unitary transform matrix to orthogonalize the pseudo wavefunction.
-            use Lowding's symmetric or occupation weighted orthogonalization scheme.
-            Lowding's:
-                   C = S^{-1/2}
-            Occupation weighted:
-                   C = W(WSW)^{-1/2}
-        Args:
-            OccWeighted   : logical (optional), occupation weighted?
-            tol           : float (optional), small value for occupation cutoff
-        Returns:
-            C    : ndarray (nb x nb), the unitary transform matrix.
-        """
-        S = self.getOverlap()
-        if OccWeighted:
-            W = self.getWMatrix(tol)
-            wsw = np.dot(W, np.dot(S, W)) # (WSW)
-            wsw = scipy.linalg.inv(wsw)   # (WSW)^{-1}
-            wsw = scipy.linalg.sqrtm(wsw) # (WSW)^{-1/2}
-            C = np.dot(W,wsw)
-        else:
-            C = scipy.linalg.inv(S)       # (S)^{-1}
-            C = scipy.linalg.sqrtm(C)     # (S)^{-1/2}
-
-        return C
-
-
-    def getWAE(self, OccWeighted = True, tol = 1.0E-3, check = True):
-        """
-        Orthgonalize the PS wavefunction, get the AE wavefunction.
-        Args:
-            OccWeighted : logical
-            tol         : float
-            check       : logical, check < WAE | WAE > == I
-        Returns:
-            w           : ndarray (nb x nplw), all-electron wavefunction
-        """
-        C = self.getOrthMatrix(OccWeighted = OccWeighted, tol = tol)
-        w = self.getWPS()
-        w = np.dot(w.T, C)
-        w = w.T
-        #print('checking orthgonality...')
-
-        I = np.eye(len(w), dtype=np.complex128)
-        WW = np.dot(
-            np.conj(w), w.T
-        )
-        orth_success = np.allclose(WW, I)
-        if orth_success:
-            #print("Wavefunction orthogonalized.")
-            return w
-        else:
-            raise ValueError('Orthognalization failed.')
+#    def getOverlap(self):
+#        nb = nb
+#        wps = wps
+#        S = np.dot(
+#            np.conj(wps), wps.T
+#        )
+#        return S
+#
+#    def getWMatrix(self, tol):
+#        """
+#        Construct the occupation number diagonal matrix.
+#            Small occupation numbers will be replaced by a small cutoff value tol, to bypass
+#            possible numerical problems due to linear dependence.
+#            see Szabo, "Modern Quantum Chemistry", Sec. 3.4.5 for details.
+#        """
+#        W = np.array([max(tol, x) for x in FermiW])
+#        return np.diag(W)
+#
+#    def getOrthMatrix(self, OccWeighted, tol):
+#        """
+#        ***
+#            Incorrect for AE purpose, but might be usefule for later transformations.
+#        ***
+#        Construct the unitary transform matrix to orthogonalize the pseudo wavefunction.
+#            use Lowding's symmetric or occupation weighted orthogonalization scheme.
+#            Lowding's:
+#                   C = S^{-1/2}
+#            Occupation weighted:
+#                   C = W(WSW)^{-1/2}
+#        Args:
+#            OccWeighted   : logical (optional), occupation weighted?
+#            tol           : float (optional), small value for occupation cutoff
+#        Returns:
+#            C    : ndarray (nb x nb), the unitary transform matrix.
+#        """
+#        S = self.getOverlap()
+#        if OccWeighted:
+#            W = self.getWMatrix(tol)
+#            wsw = np.dot(W, np.dot(S, W)) # (WSW)
+#            wsw = scipy.linalg.inv(wsw)   # (WSW)^{-1}
+#            wsw = scipy.linalg.sqrtm(wsw) # (WSW)^{-1/2}
+#            C = np.dot(W,wsw)
+#        else:
+#            C = scipy.linalg.inv(S)       # (S)^{-1}
+#            C = scipy.linalg.sqrtm(C)     # (S)^{-1/2}
+#
+#        return C
+#
+#
+#    def getWAE(self, OccWeighted = True, tol = 1.0E-3, check = True):
+#        """
+#        Orthogonalize the WPS using the overlap matrix.
+#        The overlap matrix can be constructed by the projector coeffs written by
+#            VASP
+#
+#        Args:
+#            OccWeighted : logical
+#            tol         : float
+#            check       : logical, check < WAE | WAE > == I
+#        Returns:
+#            w           : ndarray (nb x nplw), all-electron wavefunction
+#        """
+#        C = self.getOrthMatrix(OccWeighted = OccWeighted, tol = tol)
+#        w = self.getWPS()
+#        w = np.dot(w.T, C)
+#        w = w.T
+#        #print('checking orthgonality...')
+#
+#        I = np.eye(len(w), dtype=np.complex128)
+#        WW = np.dot(
+#            np.conj(w), w.T
+#        )
+#        orth_success = np.allclose(WW, I)
+#        if orth_success:
+#            #print("Wavefunction orthogonalized.")
+#            return w
+#        else:
+#            raise ValueError('Orthognalization failed.')
         
 
 
