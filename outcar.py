@@ -30,13 +30,17 @@ class OUTCAR:
             None
         Returns:
             efermi:  real, Fermi energy
+        Note:
+            read the last E-fermi line for NWRITE = 3
+            thanks to Zheng, Qijing <zqj@mail.ustc.edu.cn>
         """
         with open(self.__fname, 'r') as fh:
-            while True:
-                l = fh.readline().strip()
-                if l.startswith('E-fermi'):
-                    break
-        efermi = float(l.split()[2])
+            dump = []
+            for l in fh:
+                if l.startswith(' E-fermi :'):
+                    dump.append(l)
+            print(dump)
+        efermi = float(dump[-1].split()[2])
         return efermi
 
     def getKSampling(self):
@@ -252,16 +256,19 @@ class OUTCAR:
 
 
 if __name__ == '__main__':
-    vo = OUTCAR('freq/OUTCAR')
+    vo = OUTCAR('../test/OUTCAR')
     a = vo.getLattice()
     print(a)
     coord = vo.getX0()
     #print(coord)
 
-    m = vo.getNormalMode(3)
-    omega = m.get('Omega')
-    mode = m.get('mode')
-    print(omega)
+    EF = vo.getFermiEnergy()
+    print('E-fermi: = ', EF)
+
+    #m = vo.getNormalMode(3)
+    #omega = m.get('Omega')
+    #mode = m.get('mode')
+    #print(omega)
     #print(mode)
 
     IonsPerType = vo.getIonsPerType()
