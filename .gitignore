@@ -3,6 +3,7 @@
 
 # python
 *.py[cod]
+*.npy
 
 # Binary
 mode0/WAVECAR
@@ -25,6 +26,9 @@ run.log
 
 # pycharm
 .idea
+
+# vim swap files
+*.swp
 
 # ipython notebook
 *ipynb*
