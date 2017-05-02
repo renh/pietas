@@ -256,7 +256,6 @@ class WAVECAR:
         return coeff
 
 
-
     def prepareGVEC(self, ik):
         '''
         Prepare the set of G vectors that satisfying
@@ -275,24 +274,24 @@ class WAVECAR:
         kvec = dump[1]
         print("Preparing GVEC for kvec:", kvec)
         const = 1.0 / RYTOEV / AUTOA2
-        Ec = Ec * const
+        Ec = self._Ec * const
         GVEC = []
-        for k in range(2*ngmax[2]+1):
+        for k in range(2*self._ngmax[2]+1):
             igz = k
-            if igz > ngmax[2]:
-                igz = k - 2 * ngmax[2] - 1
-            for j in range(2*ngmax[1]+1):
+            if igz > self._ngmax[2]:
+                igz = k - 2 * self._ngmax[2] - 1
+            for j in range(2*self._ngmax[1]+1):
                 igy = j
-                if igy > ngmax[1]:
-                    igy = j - 2 * ngmax[1] - 1
-                for i in range(2*ngmax[0]+1):
+                if igy > self._ngmax[1]:
+                    igy = j - 2 * self._ngmax[1] - 1
+                for i in range(2*self._ngmax[0]+1):
                     igx = i
-                    if igx > ngmax[0]:
-                        igx = i - 2 * ngmax[0] - 1
+                    if igx > self._ngmax[0]:
+                        igx = i - 2 * self._ngmax[0] - 1
                     G = np.array([igx, igy, igz])
                     dump = (G + kvec).reshape(1,-1)
                     #print(dump.shape)
-                    sumkg = np.dot(dump, b)
+                    sumkg = np.dot(dump, self._b)
                     #print(sumkg.shape)
                     #print(sumkg)
                     #raise SystemExit
@@ -301,6 +300,56 @@ class WAVECAR:
                         GVEC.append([igx,igy,igz])
                             
         return np.array(GVEC)
+
+    def gvectors(self, ikpt=0, gamma=False):
+        '''
+        Generate the G-vectors that satisfies the following relation
+            (G + k)**2 / 2 < ENCUT
+        '''
+        assert 0 <= ikpt  <= self._nk - 1,  'Invalid kpoint index!'
+
+        # kvec = self._kvecs[ikpt-1]
+        dump = self.readKHeader(0, ikpt)
+        nplw = dump[0]
+        kvec = dump[1]
+        ngrid = 2 * self._ngmax + 1
+        # fx, fy, fz = [fftfreq(n) * n for n in self._ngrid]
+        # fftfreq in scipy.fftpack is a little different with VASP frequencies
+        fx = [ii if ii < ngrid[0] / 2 + 1 else ii - ngrid[0]
+                for ii in range(ngrid[0])]
+        fy = [jj if jj < ngrid[1] / 2 + 1 else jj - ngrid[1]
+                for jj in range(ngrid[1])]
+        fz = [kk if kk < ngrid[2] / 2 + 1 else kk - ngrid[2]
+                for kk in range(ngrid[2])]
+        if gamma:
+            # parallel gamma version of VASP WAVECAR exclude some planewave
+            # components, -DwNGZHalf
+            kgrid = np.array([(fx[ii], fy[jj], fz[kk])
+                              for kk in range(ngrid[2])
+                              for jj in range(ngrid[1])
+                              for ii in range(ngrid[0])
+                              if (
+                                  (fz[kk] > 0) or
+                                  (fz[kk] == 0 and fy[jj] > 0) or
+                                  (fz[kk] == 0 and fy[jj] == 0 and fx[ii] >= 0)
+                              )], dtype=float)
+        else:
+            kgrid = np.array([(fx[ii], fy[jj], fz[kk])
+                              for kk in range(ngrid[2])
+                              for jj in range(ngrid[1])
+                              for ii in range(ngrid[0])], dtype=float)
+
+        # Kinetic_Energy = (G + k)**2 / 2
+        # HSQDTM    =  hbar**2/(2*ELECTRON MASS)
+        KENERGY = HSQDTM * np.linalg.norm(
+                    np.dot(kgrid + kvec[np.newaxis,:] , self._b), axis=1
+                )**2
+        # find Gvectors where (G + k)**2 / 2 < ENCUT
+        Gvec = kgrid[np.where(KENERGY < self._Ec)[0]]
+
+        assert Gvec.shape[0] == nplw, 'No. of planewaves not consistent! %d %d %d' % \
+                (Gvec.shape[0], nplw, np.prod(ngrid))
+        return np.asarray(Gvec, dtype=int)
 
     #def calcOverlap(self):
     #    S = np.zeros([self.nb, self.nb, self.nk, self.nspin], dtype=np.complex128)
