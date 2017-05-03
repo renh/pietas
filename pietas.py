@@ -136,9 +136,10 @@ opath = param.get('output path')
 if not os.path.exists(opath):
     os.mkdir(opath)
 else:
-    print("\n*******************************************************")
-    print( "* Warning: files in directory {} might be overwritten! *")
-    print("*******************************************************\n")
+    print("\n" + "*" * (54 + len(opath)) + 
+          "\n* Warning: files in directory {} might be overwritten! *".format(
+              opath) + 
+          "\n" + "*" * (54 + len(opath)) + '\n')
 for ispin in range(param.get('nspin')):
     rho_0_fd_tot = np.zeros(NGF)
     drho_P_tot = np.zeros(NGF)

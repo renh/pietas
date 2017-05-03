@@ -39,7 +39,7 @@ class OUTCAR:
             for l in fh:
                 if l.startswith(' E-fermi :'):
                     dump.append(l)
-            print(dump)
+            #print(dump)
         efermi = float(dump[-1].split()[2])
         return efermi
 
