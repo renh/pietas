@@ -16,7 +16,22 @@ import normalcar as nm
 #==============================================================================
 
 
-def calc_aug_charge(bm, bn, LMMax, Qij, Pij):
+def calc_aug_charge(bm, bn, LMMax, Qij, Pi, Pj):
+    """
+    Augmented charge for two bands from the same or different systems
+    Args:
+        bm, bn   : integer, band indicies for Psi_m and Psi_n
+        LMMax    : integer 2D numpy array,
+                     row  -- ion type
+                     col1 -- No. of (l,m) channels
+                     col2 -- No. of ions per type
+        Qij      : float 4D numpy array [LMDIM, LMDIM, NIonsPerType, NType],
+                   augmented charges for each pair of angular channels
+        Pi, Pj   : complex 4D numpy array [NPRO, Nbands, Nkpts, Nspin]
+                   projector coefficients
+    Return:
+        augchg   : complex
+    """
     NTypes = len(LMMax)
     augchg = 0
     ion_ind = 0
@@ -25,19 +40,14 @@ def calc_aug_charge(bm, bn, LMMax, Qij, Pij):
         NChannels, NIons = LMMax[itype]
         for iion in range(NIons):
             qij = Qij[:LMMax[itype,0], :LMMax[itype,0], ion_ind, 0]
-            pi = Pij[proj_ind:proj_ind+LMMax[itype,0], bm, 0, 0]
-            pj = Pij[proj_ind:proj_ind+LMMax[itype,0], bn, 0, 0]
+            pi = Pi[proj_ind:proj_ind+LMMax[itype,0], bm, 0, 0]
+            pj = Pj[proj_ind:proj_ind+LMMax[itype,0], bn, 0, 0]
             
             augchg += np.dot(np.conj(pi), np.dot(qij, pj))
             
             ion_ind += 1
             proj_ind += LMMax[itype, 0]
     return augchg
-
-
-
-
-
 
 
 
@@ -73,7 +83,7 @@ if __name__ == '__main__':
     for bm in range(NBands):
         for bn in range(bm, NBands):
             S[bm, bn] = S_PS[bm, bn] + \
-                    calc_aug_charge(bm, bn, LMMax, Qij, Pij)
+                    calc_aug_charge(bm, bn, LMMax, Qij, Pij, Pij)
             if (bm != bn):
                 S[bn, bm] = S[bm, bn]
 
