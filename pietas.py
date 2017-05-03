@@ -151,9 +151,9 @@ for ispin in range(param.get('nspin')):
         print("\n Calculation for spin = {}, kpt = {}".format(ispin,ik))
         print("\n"+"="*50+"\n")
         # first get the WaveFunction objects @(isipn,ik)
-        psi_0 = wf.WaveFunction(wc0, ispin, ik, normalize=True)
-        psi_b = wf.WaveFunction(wcb, ispin, ik, normalize=True)
-        psi_f = wf.WaveFunction(wcf, ispin, ik, normalize=True)
+        psi_0 = wf.WaveFunction(wc0, ispin, ik)
+        psi_b = wf.WaveFunction(wcb, ispin, ik)
+        psi_f = wf.WaveFunction(wcf, ispin, ik)
         kvec = psi_0.getKVec()
         nplw = psi_0.getNPlw()
         print(" k-vector: {:10.3f}{:10.3f}{:10.3f}".format(*kvec))
@@ -179,7 +179,7 @@ for ispin in range(param.get('nspin')):
 
         # get required psi_0 for LDOS calculation
         band_init, band_final = bands_contrib.get('bands_range')
-        psi_0_calc = psi_0.getWAE()[band_init : band_final+1]
+        psi_0_calc = psi_0.getWPS()[band_init : band_final+1]
 
         # IETS calculation
         if method.startswith('T'):
