@@ -174,7 +174,7 @@ for ispin in range(param.get('nspin')):
         writelog.write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib)
 
         # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
-        print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
+        #print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
         psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
 
         # get required psi_0 for LDOS calculation

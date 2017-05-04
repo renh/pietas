@@ -6,6 +6,8 @@ wavecar:
 
 outcar:
     equilibrium : ../mode0/OUTCAR
+    backward    : ../mode3/b/OUTCAR
+    forward     : ../mode3/f/OUTCAR
 
 normalcar:
     equilibrium : ../mode0/NormalCAR
