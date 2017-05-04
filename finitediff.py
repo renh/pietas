@@ -37,9 +37,12 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     Raises:
         None
     """
+    print("\nPerform finite-difference for wavefunctions...")
     EF = param.get('Fermi energy')
     scale = param.get('scale factor')
     sigma = param.get('sigma')
+    print("  FD scale factor     : {:.2f}".format(scale))
+    print("  Gaussian broadening : {:.3f}".format(sigma))
     
     bands_range = bands_contrib.get('bands_range')
     band_init, band_final = bands_range

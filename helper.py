@@ -101,8 +101,8 @@ def getBandsRange(psi_0, psi_b, psi_f, param):
     bands_range = [band_init, band_final]
 
     # weights
-    # note that the weights here is juct for quantitative means, so just the un-displaced data
-    # is record.
+    # note that the weights here is just for quantitative means, so only data 
+    # calculated from the eigenenergies of the un-displaced data is reported.
     nbands_calc = band_final - band_init + 1
     weights = []
     for i in range(nbands_calc):
