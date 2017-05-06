@@ -4,6 +4,9 @@
 import numpy as np
 import helper
 from constant import PI
+import normalcar as nm
+import wavefunction as wf
+import checker
 
 def inner_product(psi1, psi2):
     """
@@ -53,14 +56,63 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     E_0_fd = (E_b + E_f) / 2.0
     gw_fd = helper.Gaussian(E_0_fd, EF, sigma)
 
-    # In practice, we first construct the inner product matrix between backward and forward
-    # displaced wavefunctions:
-    #    A[m,n] = < Psi_b[m] | Psi_f[n] >
-    # this will be used in the calculation of finite-differenced wavefunctions ( |Psi_0_fd> ),
-    # and the inter-band mixing coefficients
-    #A = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
+    ## In practice, we first construct the inner product matrix between backward and forward
+    ## displaced wavefunctions:
+    ##    A[m,n] = < Psi_b[m] | Psi_f[n] >
+    ## this will be used in the calculation of finite-differenced wavefunctions ( |Psi_0_fd> ),
+    ## and the inter-band mixing coefficients
+    ##A = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
+    
+    # We first evaluate the overlap matrix between WFs will be used in the calculation
+    #    The overlap operator:
+    #       \hat{S} = 1 + \sum_{I,i,j} |beta_i> Q_{ij} <beta_j|
+    #    thus the overlap matrix has two components:
+    #       1) the overlap between pseudo WFs:  SPS_{mn} = < WPS_m | WPS_n >
+    #       2) the augmentation charge:
+    #               AC_{mn} = \sum_{I,i,j} (p_i)^* Q_{ij} p_j
+    #    and the whole overlap in PAW or USPP formalism can be obtained by
+    #           S = SPS + AC
 
-    #psi_b_calc = psi_b.getWAE(OccWeighted=False)[band_init : band_final+1]
+    # read pseudo WFs and calculate SPS
+    wps_b = psi_b.getWPS()[band_init : band_final+1]
+    wps_f = psi_f.getWPS()[band_init : band_final+1]
+    
+    SPS = np.dot(np.conj(wps_f), wps_b.T)
+
+    # ==================
+    # evaluate augmented charge
+    # normalcar
+    nmc_b = nm.NormalCAR(normalcar = param.get('normalcar').get('backward'), 
+            wavecar = param.get('wavecar').get('backward')
+            )
+    nmc_f = nm.NormalCAR(normalcar = param.get('normalcar').get('forward'), 
+            wavecar = param.get('wavecar').get('forward')
+            )
+    
+    # read projector info
+    LMDim_b = nmc_b.getLMDim()
+    LMDim_f = nmc_f.getLMDim()
+    assert(LMDim_b == LMDim_f)
+    Qij_b = nmc_b.getCQij()
+    Qij_f = nmc_f.getCQij()
+    assert(np.allclose(Qij_b, Qij_f))
+    LMMax_b = nmc_b.getLMMax()
+    LMMax_f = nmc_f.getLMMax()
+    assert(LMMax_b == LMMax_f)
+
+    Pij_b = nmc_b.getProjCoeffs()
+    Pij_f = nmc_f.getProjCoeffs()
+
+    if (param.get('check').get('WF orthonormal')):
+        checker.check_orthonormal(wps_b, Qij_b, Pij_b, bands_range, LMMax)
+        
+    raise SystemExit
+    # ==================
+
+
+
+
+
     psi_b_calc = psi_b.getWPS()[band_init : band_final+1]
     nplw = len(psi_b_calc[0])
     assert(nplw == psi_b.getNPlw())

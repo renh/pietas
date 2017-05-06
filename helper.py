@@ -3,6 +3,7 @@
 
 from constant import *
 import numpy as np
+import wavefunction as wf
 
 sqrtPI = 1.7724538509055159
 
@@ -56,8 +57,8 @@ def getBandsRange(psi_0, psi_b, psi_f, param):
         non-negligible contribution means the Gaussian weights no less than 'cutoff'
 
     Args:
-        psi_0, psi_b, psi_f : WaveFunction objects, contain all the necessary info about the 
-                              wavefunction (pseudo and all-electron) at this (ispin, ik)
+        psi_0, psi_b, psi_f : WaveFunction classes for the equilibrium, backward/
+                              forward displaced systems for specific (ispin, ik)
         param               : input configuration, augmented with some electronic structure 
                               info read from a static VASP calculation of the equilibrium geom.
     Returns:
@@ -74,7 +75,7 @@ def getBandsRange(psi_0, psi_b, psi_f, param):
     EF = param.get('Fermi energy')
     nbands = param.get('nbands')
 
-    # eigen-engies
+    # eigen-energies
     E_0 = psi_0.getEig()
     E_b = psi_b.getEig()
     E_f = psi_f.getEig()

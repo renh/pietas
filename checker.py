@@ -3,6 +3,7 @@
 import os
 from wavefunction import WAVECAR
 import numpy as np
+import overlap
 import filecmp
 
 def check_WAVECAR(wavecar1, wavecar2):
@@ -95,4 +96,47 @@ def same_file(wavecar1, wavecar2, wavecar3):
         print("It seems that you are using same files to do finite difference, exit")
         print("\tComment the 'same_file' checker if you know what you are doing")
         raise SystemExit
+
+def check_orthonormal(psi, LMMax, Qij, Pij):
+    print('check orthonomality')
+    wps = psi.getWPS()
+    nb = len(wps)
+    S_ps = np.dot(np.conj(wps), wps.T)
+    print(S_ps.shape)
+
+    AC = np.zeros([nb,nb],dtype=np.complex128)
+    for mband in range(nb):
+        if (not mband%40): print('mband = ', mband)
+        for nband in range(nb):
+            AC[mband,nband] = overlap.calc_aug_charge(
+                    mband, nband, LMMax, Qij, Pij, Pij
+                    )
+            if mband != nband:
+                AC[nband, mband] = np.conj(AC[mband, nband])
+
+    S = S_ps + AC
+    I_matrix = np.eye(nb, dtype=np.complex128)
+    if np.allclose(I_matrix, S):
+        print('  orthonormality check passed.')
+    else:
+        diff = I_matrix - S
+        ind = np.argmax(np.abs(diff))
+        max_diff = np.max(np.abs(diff))
+        m,n = ind // nb, ind - (ind // nb * nb)
+        print('  largest discrepancy occurs S({}, {}) = {}'.format(
+            m, n, S[m,n]
+                ))
+        if max_diff < 1.E-6:
+            print('  orthonormality check passed.')
+        else:
+            raise ValueError('  orthonormality check failed.')
+
+
+
+
+
+
+
+    return
+
         

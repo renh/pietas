@@ -25,9 +25,9 @@ def calc_aug_charge(bm, bn, LMMax, Qij, Pi, Pj):
                      row  -- ion type
                      col1 -- No. of (l,m) channels
                      col2 -- No. of ions per type
-        Qij      : float 4D numpy array [LMDIM, LMDIM, NIonsPerType, NType],
+        Qij      : float 3D numpy array [LMDIM, LMDIM, NIons] @ispin
                    augmented charges for each pair of angular channels
-        Pi, Pj   : complex 4D numpy array [NPRO, Nbands, Nkpts, Nspin]
+        Pi, Pj   : complex 2D numpy array [NPRO, Nbands] @(ik,ispin)
                    projector coefficients
     Return:
         augchg   : complex
@@ -39,9 +39,9 @@ def calc_aug_charge(bm, bn, LMMax, Qij, Pi, Pj):
     for itype in range(NTypes):
         NChannels, NIons = LMMax[itype]
         for iion in range(NIons):
-            qij = Qij[:LMMax[itype,0], :LMMax[itype,0], ion_ind, 0]
-            pi = Pi[proj_ind:proj_ind+LMMax[itype,0], bm, 0, 0]
-            pj = Pj[proj_ind:proj_ind+LMMax[itype,0], bn, 0, 0]
+            qij = Qij[:LMMax[itype,0], :LMMax[itype,0], ion_ind]
+            pi = Pi[proj_ind:proj_ind+LMMax[itype,0], bm]
+            pj = Pj[proj_ind:proj_ind+LMMax[itype,0], bn]
             
             augchg += np.dot(np.conj(pi), np.dot(qij, pj))
             
@@ -52,9 +52,9 @@ def calc_aug_charge(bm, bn, LMMax, Qij, Pi, Pj):
 
 
 if __name__ == '__main__':
-    wc = wf.WAVECAR('../test/WAVECAR')
-    nmc = nm.NormalCAR(normalcar='../test/NormalCAR', 
-            wavecar='../test/WAVECAR')
+    wc = wf.WAVECAR('../mode0/WAVECAR')
+    nmc = nm.NormalCAR(normalcar='../mode0/NormalCAR', 
+            wavecar='../mode0/WAVECAR')
     
     # read pseudo wave function
     wps = wf.WaveFunction(wc, ispin=0, ik=0)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     for bm in range(NBands):
         for bn in range(bm, NBands):
             S[bm, bn] = S_PS[bm, bn] + \
-                    calc_aug_charge(bm, bn, LMMax, Qij, Pij, Pij)
+                    calc_aug_charge(bm, bn, LMMax, Qij[:,:,:,0], Pij[:,:,0,0], Pij[:,:,0,0])
             if (bm != bn):
                 S[bn, bm] = S[bm, bn]
 

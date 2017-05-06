@@ -10,6 +10,7 @@ import logging
 import sys
 import os
 import wavefunction as wf
+import normalcar
 import checker
 import grid
 import outcar
@@ -140,16 +141,50 @@ else:
           "\n* Warning: files in directory {} might be overwritten! *".format(
               opath) + 
           "\n" + "*" * (54 + len(opath)) + '\n')
+
+# Read PAW projector info
+# read projector coeffs before (spin, kpt) loop because the NormalCAR file
+# is not written in the direct access mode. It's better read stuff once for all.
+#nmc0 = normalcar.NormalCAR(normalcar=param.get('normalcar').get('equilibrium'), 
+#        wavecar=param.get('wavecar').get('equilibrium'))
+nmc_b = normalcar.NormalCAR(normalcar=param.get('normalcar').get('backward'), 
+        wavecar=param.get('wavecar').get('backward'))
+nmc_f = normalcar.NormalCAR(normalcar=param.get('normalcar').get('forward'), 
+        wavecar=param.get('wavecar').get('forward'))
+
+# (l,m) channel dimensions
+LMDim_b = nmc_b.getLMDim()
+LMDim_f = nmc_f.getLMDim()
+assert(LMDim_b == LMDim_f)
+
+# aug charges
+Qij_b = nmc_b.getCQij()
+Qij_f = nmc_f.getCQij()
+assert(np.allclose(Qij_b, Qij_f))
+
+# projector dimensions
+LMMax_b = nmc_b.getLMMax()
+LMMax_f = nmc_f.getLMMax()
+assert(np.allclose(LMMax_b, LMMax_f))
+
+# projector coeffs
+Pij_b = nmc_b.getProjCoeffs()
+Pij_f = nmc_f.getProjCoeffs()
+
+
+# loop over spinors
 for ispin in range(param.get('nspin')):
     rho_0_fd_tot = np.zeros(NGF)
     drho_P_tot = np.zeros(NGF)
     drho_I_tot = np.zeros(NGF)
     rho_0_orig_tot = np.zeros(NGF)
 
+    #loop over kpts
     for ik in range(param.get('nkpts')):
         print("\n" + "="*50)
         print("\n Calculation for spin = {}, kpt = {}".format(ispin,ik))
         print("\n"+"="*50+"\n")
+        
         # first get the WaveFunction objects @(isipn,ik)
         psi_0 = wf.WaveFunction(wc0, ispin, ik)
         psi_b = wf.WaveFunction(wcb, ispin, ik)
@@ -157,6 +192,7 @@ for ispin in range(param.get('nspin')):
         kvec = psi_0.getKVec()
         nplw = psi_0.getNPlw()
         print(" k-vector: {:10.3f}{:10.3f}{:10.3f}".format(*kvec))
+
 
         GVEC = wc0.prepareGVEC(ik)
         if (len(GVEC) != nplw):
@@ -173,9 +209,15 @@ for ispin in range(param.get('nspin')):
         bands_contrib = helper.getBandsRange(psi_0, psi_b, psi_f, param)
         writelog.write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib)
 
+        # check orthonormality of wavefunctions @(ispin, ik)
+        if param.get('check').get('orthonormality'):
+            checker.check_orthonormal(psi_b, LMMax_b, Qij_b[:,:,:,ispin], 
+                    Pij_b[:,:,ik,ispin])
+        raise SystemExit
+
         # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
         #print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
-        psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
+        #psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
 
         # get required psi_0 for LDOS calculation
         band_init, band_final = bands_contrib.get('bands_range')

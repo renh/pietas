@@ -24,6 +24,11 @@ wae fname:
   equilibrium : mode0/wae.spin-{:1d}.k-{:02d}.npy
   backward    : mode3/wae.b.spin-{:1d}.k-{:02d}.npy
   forward     : mode3/wae.f.spin-{:1d}.k-{:02d}.npy
+
+
+# check data consistency
+check:
+    orthonormality : True
   
 
 #

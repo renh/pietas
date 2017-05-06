@@ -129,7 +129,7 @@ class NormalCAR:
 
     def getProjCoeffs(self):
         _CPROJ = np.zeros([self._NPROJ, self._NB, self._NK, self._NRSPINORS],
-                dtype=np.complex128)
+                dtype=np.complex128, order='F')
         for ispin in range(self._NRSPINORS):
             for ik in range(self._NK):
                 for ib in range(self._NB):

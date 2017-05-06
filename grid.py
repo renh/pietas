@@ -55,8 +55,8 @@ def genIndex(GVEC, NGF):
         None
     """
     index = []
-    print(GVEC.shape)
-    print(NGF)
+    #print(GVEC.shape)
+    #print(NGF)
     for G in GVEC:
         index.append(
             (G[0]%NGF[0], G[1]%NGF[1], G[2]%NGF[2])
