@@ -27,7 +27,7 @@ def Gaussian(v1, v2, sigma):
     dv_over_sigma = dv / sigma
     exponential = - np.square(dv_over_sigma)
     gaussian = np.exp(exponential)
-    #gaussian /= (sqrtPI * sigma)
+    gaussian /= (sqrtPI * sigma)
     return gaussian
 
 def iGaussian(cutoff, sigma):
