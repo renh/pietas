@@ -28,7 +28,7 @@ wae fname:
 
 # check data consistency
 check:
-    orthonormality : True
+    orthonormality : False
   
 
 #

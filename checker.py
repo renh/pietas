@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 from wavefunction import WAVECAR
 import numpy as np
@@ -98,15 +99,15 @@ def same_file(wavecar1, wavecar2, wavecar3):
         raise SystemExit
 
 def check_orthonormal(psi, LMMax, Qij, Pij):
-    print('check orthonomality')
     wps = psi.getWPS()
     nb = len(wps)
     S_ps = np.dot(np.conj(wps), wps.T)
-    print(S_ps.shape)
+    #print(S_ps.shape)
 
     AC = np.zeros([nb,nb],dtype=np.complex128)
+    print("    evaluating augmented charges, will take some time...")
     for mband in range(nb):
-        if (not mband%40): print('mband = ', mband)
+        #if (not mband%40): print('mband = ', mband)
         for nband in range(nb):
             AC[mband,nband] = overlap.calc_aug_charge(
                     mband, nband, LMMax, Qij, Pij, Pij
@@ -117,26 +118,19 @@ def check_orthonormal(psi, LMMax, Qij, Pij):
     S = S_ps + AC
     I_matrix = np.eye(nb, dtype=np.complex128)
     if np.allclose(I_matrix, S):
-        print('  orthonormality check passed.')
+        print('    orthonormality check passed.')
     else:
         diff = I_matrix - S
         ind = np.argmax(np.abs(diff))
         max_diff = np.max(np.abs(diff))
         m,n = ind // nb, ind - (ind // nb * nb)
-        print('  largest discrepancy occurs S({}, {}) = {}'.format(
+        print('    largest discrepancy occurs S({}, {}) = {}'.format(
             m, n, S[m,n]
                 ))
         if max_diff < 1.E-6:
-            print('  orthonormality check passed.')
+            print('    orthonormality check passed.')
         else:
-            raise ValueError('  orthonormality check failed.')
-
-
-
-
-
-
-
+            raise ValueError('    orthonormality check failed.')
     return
 
         

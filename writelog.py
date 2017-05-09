@@ -16,20 +16,20 @@ def write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib):
     """
     bands_range = bands_contrib.get('bands_range')
     band_init, band_final = bands_range
-    nbands_calc = band_final - band_init + 1
     gw = bands_contrib.get('weights')
 
     E_0 = psi_0.getEig()
     E_b = psi_b.getEig()
     E_f = psi_f.getEig()
     
-    print("\n {} Bands taking into account for this k-point:".format(nbands_calc))
+    print("\n {} Bands taking into account for this k-point:".format(
+        band_final - band_init + 1
+        ))
     print("  all contributions evaluated respect to the equilibrium Fermi level")
-    print("\n  nb        E0          Eb          Ef        weight")
-    for ibm in range(nbands_calc):
-        m = band_init + ibm
-        print("{:4d}{:12.4f}{:12.4f}{:12.4f}{:14.5E}".format(
-            m+1, E_0[m], E_b[m], E_f[m], gw[ibm]
+    print("\n  nb(from 1)    E0          Eb          Ef        weight")
+    for ibm in range(band_init, band_final+1):
+        print("{:8d}{:12.4f}{:12.4f}{:12.4f}{:14.5E}".format(
+            ibm+1, E_0[ibm], E_b[ibm], E_f[ibm], gw[ibm-band_init]
         ))
 
     return

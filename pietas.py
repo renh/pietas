@@ -157,6 +157,7 @@ LMDim_b = nmc_b.getLMDim()
 LMDim_f = nmc_f.getLMDim()
 assert(LMDim_b == LMDim_f)
 
+
 # aug charges
 Qij_b = nmc_b.getCQij()
 Qij_f = nmc_f.getCQij()
@@ -203,24 +204,48 @@ for ispin in range(param.get('nspin')):
 
         index = grid.genIndex(GVEC, param.get('NGF'))
         
+        #
         # find the bands with non-negligible contributions to the (change of) Fermi level LDOS
         #    this contribution is Gaussian weighted:
         #        G(Ei, EF, sigma) >= cutoff
         bands_contrib = helper.getBandsRange(psi_0, psi_b, psi_f, param)
         writelog.write_bands_contrib(psi_0, psi_b, psi_f, bands_contrib)
-
+        
+        #
         # check orthonormality of wavefunctions @(ispin, ik)
+        #
         if param.get('check').get('orthonormality'):
+            print('\n  checking orthonormality of WFs from backward displaced sys...')
             checker.check_orthonormal(psi_b, LMMax_b, Qij_b[:,:,:,ispin], 
                     Pij_b[:,:,ik,ispin])
+
+            print('\n  checking orthonormality of WFs from forward displaced sys...')
+            checker.check_orthonormal(psi_f, LMMax_f, Qij_f[:,:,:,ispin], 
+                    Pij_f[:,:,ik,ispin])
+        else:
+            print('\n  Warning: WF orthonomality not checked. Proceeding...')
+
+        #
+        # Evaluate the 'overlap' matrix < + | - >
+        #   only matrix elements between WFs considered in the calculation 
+        #   will be calculated
+        #
+        
+        # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
+        print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
+
+        # ugly function here, encapsulate PAW related data into classes later.
+        dpsi_P, dpsi_I, psi_0_fd = finitediff.finite_difference(
+                psi_b, psi_f, 
+                Pij_b[:,:,ik,ispin], Pij_f[:,:,ik,ispin], 
+                Qij_b[:,:,:,ispin], LMMax_b, 
+                bands_contrib, param
+                )
+
         raise SystemExit
 
-        # finite difference for dpsi (psi^+ - psi^-) and psi0_fd (psi^+ + psi^-)
-        #print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
-        #psi_fd = finitediff.finite_difference(psi_b, psi_f, bands_contrib, param)
 
         # get required psi_0 for LDOS calculation
-        band_init, band_final = bands_contrib.get('bands_range')
         psi_0_calc = psi_0.getWPS()[band_init : band_final+1]
 
         # IETS calculation

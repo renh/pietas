@@ -7,6 +7,7 @@ from constant import PI
 import normalcar as nm
 import wavefunction as wf
 import checker
+import overlap
 
 def inner_product(psi1, psi2):
     """
@@ -27,13 +28,20 @@ def inner_product(psi1, psi2):
      
 
 
-def finite_difference(psi_b, psi_f, bands_contrib, param):
+def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, param):
     """
     Finite difference calculation for dpsi and psi_0.
     Args:
-        psi_b, psi_f  : WaveFunction objects correspond to the backward and forward
-                               displaced geometry.
+        psi_b, psi_f  : WaveFunction objects @(ispin,ik) correspond to the 
+                                backward and forward displaced geometry.
+        pij_b, pij_f  : 2D numpy array (NPROJ x NB), np.complex128
+                                PAW projector coefficients @(ispin, ik)
+        qij           : 3D numpy array (LMDIM x LMDIM x NIONS), float
+                                Augmented charges
+        LMMax         : 2D numpy array with (NIonTypes x 2), integer
+                                No. of (l,m) channels and No. of ions per type
         bands_contrib        : dictionay for band contribution at the Fermi level.
+
         param                : input configuration and some electronic structure info.
     Returns:
         psi_fd               : dictionary, including psi_0_fd, dpsi_P, dpsi_I
@@ -55,6 +63,41 @@ def finite_difference(psi_b, psi_f, bands_contrib, param):
     E_f = psi_f.getEig()
     E_0_fd = (E_b + E_f) / 2.0
     gw_fd = helper.Gaussian(E_0_fd, EF, sigma)
+
+
+    #
+    # Evaluate the 'overlap' matrix between forward/backward displaced WFs
+    #   < + | - >, only matrix elements between WFs considered in the 
+    #   calculation will be calculated.
+    # Two components for each matrix element: 1) inner product beween ps WFs; 
+    #   2) augmented charge
+    #     
+    #   first calculate the inner product
+    wps_b = psi_b.getWPS()
+    wps_f = psi_f.getWPS()
+    S_ps = np.dot(
+            np.conj(wps_f[band_init : band_final+1]), 
+            wps_b[band_init : band_final+1].T
+            )
+    print('\n  inner product calculated.')
+
+    # then augmented charge
+    AC = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
+    for m_band in range(nbands_calc):
+        for n_band in range(nbands_calc):
+            m_ind = m_band + band_init
+            n_ind = n_band + band_init
+            AC[m_band, n_band] = overlap.calc_aug_charge(
+                    m_ind, n_ind, LMMax,
+                    qij, pij_f, pij_b
+                    )
+            if n_band != m_band:
+                AC[n_band, m_band] = np.conj(AC[m_band, n_band])
+    print('\n  augmented charge calculated.')
+    S = S_ps + AC
+    for i in range(nbands_calc):
+        print(S[i,i], np.abs(S[i,i]))
+    raise SystemExit
 
     ## In practice, we first construct the inner product matrix between backward and forward
     ## displaced wavefunctions:
