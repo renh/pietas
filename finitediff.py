@@ -66,10 +66,16 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
     gw_fd = helper.Gaussian(E_0_fd, EF, sigma)
 
 
+    # We first evaluate the overlap matrix between WFs will be used in the calculation
+    #    The overlap operator:
+    #       \hat{S} = 1 + \sum_{I,i,j} |beta_i> Q_{ij} <beta_j|
+    #    thus the overlap matrix has two components:
+    #       1) the overlap between pseudo WFs:  SPS_{mn} = < WPS_m | WPS_n >
+    #       2) the augmentation charge:
+    #               AC_{mn} = \sum_{I,i,j} (p_i)^* Q_{ij} p_j
+    #    and the whole overlap in PAW or USPP formalism can be obtained by
+    #           S = SPS + AC
     #
-    # Evaluate the 'overlap' matrix between forward/backward displaced WFs
-    #   < + | - >, only matrix elements between WFs considered in the 
-    #   calculation will be calculated.
     # Two components for each matrix element: 1) inner product beween ps WFs; 
     #   2) augmented charge
     #     
@@ -104,24 +110,41 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
             ))
     print('-'*80)
 
+    # the C matrix for for the inelastic part of delta_Psi
+    #             1    1     S[n,m]*     S[m,n]
+    #   C[m,n] = ---- --- [ --------- - ---------]
+    #             2f   2     S[m,m]*     S[n,n]
+    #
+    print('\n  construct the coefficients matrix C[m,n]')
+    C = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
+    for m in range(nbands_calc):
+        for n in range(nbands_calc):
+            C[m,n] = np.conj(S[n,m] / S[m,m]) - S[m,n] / S[n,n]
+    C /= (4.0 * scale)
+
+
+    # calculate the principal part of change dpsi_P and psi_0_fd
+    #                  1                          | Psi_b(m) >
+    # | dpsi_P(m) > = --- [ | Psi_f(m) > - ------------------------ ]
+    #                 2f                    < Psi_f(m) | Psi_b(m) >
+    #
+    #                    1                          | Psi_b(m) >
+    # | psi_0_fd(m) > = --- [ | Psi_f(m) > + ------------------------ ]
+    #                    2                    < Psi_f(m) | Psi_b(m) >
+    print('  finite-difference for Psi_0 and principal part')
+    nplw = psi_b.getNPlw()
+    d_psi_P = np.zeros([nbands_calc, nplw], dtype=np.complex128)
+    psi_0_fd = np.zeros([nbands_calc, nplw], dtype=np.complex128)
+
+    for m_band in range(nbands_calc):
+        m_ind = m_band + band_init
+        d_psi_P[m_band] = wps_f[m_ind] - wps_b[m_ind] / S[m_band, m_band]
+        psi_0_fd[m_band] = wps_f[m_ind] + wps_b[m_ind] / S[m_band, m_band]
+    d_psi_P /= (2.0 * scale)
+    psi_0_fd /= 2.0
     raise SystemExit
 
-    ## In practice, we first construct the inner product matrix between backward and forward
-    ## displaced wavefunctions:
-    ##    A[m,n] = < Psi_b[m] | Psi_f[n] >
-    ## this will be used in the calculation of finite-differenced wavefunctions ( |Psi_0_fd> ),
-    ## and the inter-band mixing coefficients
-    ##A = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
     
-    # We first evaluate the overlap matrix between WFs will be used in the calculation
-    #    The overlap operator:
-    #       \hat{S} = 1 + \sum_{I,i,j} |beta_i> Q_{ij} <beta_j|
-    #    thus the overlap matrix has two components:
-    #       1) the overlap between pseudo WFs:  SPS_{mn} = < WPS_m | WPS_n >
-    #       2) the augmentation charge:
-    #               AC_{mn} = \sum_{I,i,j} (p_i)^* Q_{ij} p_j
-    #    and the whole overlap in PAW or USPP formalism can be obtained by
-    #           S = SPS + AC
 
     # read pseudo WFs and calculate SPS
     wps_b = psi_b.getWPS()[band_init : band_final+1]
@@ -185,14 +208,6 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
 
 
 
-    # calculate the principal part of change dpsi_P and psi_0_fd
-    #                  1                          | Psi_b(m) >
-    # | dpsi_P(m) > = --- [ | Psi_f(m) > - ------------------------ ]
-    #                 2f                    < Psi_f(m) | Psi_b(m) >
-    #
-    #                    1                          | Psi_b(m) >
-    # | psi_0_fd(m) > = --- [ | Psi_f(m) > + ------------------------ ]
-    #                    2                    < Psi_f(m) | Psi_b(m) >
 
     psi_b_calc_proj = []
     for ibm in range(nbands_calc):
@@ -215,11 +230,6 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
     #       ]
     #   This coefficient is equvilent to the inner product between wavefunctions
     #       \psi_m and d\psi_n, with m != n.
-    #
-    # using the inner product matrix, we have
-    #             1    1     A[m,n]     A[n,m]*
-    #   C[m,n] = ---- --- [ -------- - ---------]
-    #             2f   2     A[m,m]     A[n,n]*
     #
     
     C = np.zeros([nbands_calc, nbands_calc], dtype=np.complex128)
