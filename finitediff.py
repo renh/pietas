@@ -101,14 +101,25 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
             if n_band != m_band:
                 AC[n_band, m_band] = np.conj(AC[m_band, n_band])
     print('\n  augmented charge calculated.')
+
     S = S_ps + AC
+
+    fudge_factor = np.zeros(nbands_calc)
+
     print('\n  Overlap diagonal elements, small abs implies bands crossing')
     print('\n band\t    real\t\timag\t\t  phase/PI\t    abs'+'\n'+'-'*80)
     for i in range(nbands_calc):
         print('{:>4d}{:18.6E}{:18.6E}{:18.6f}{:15.6f}'.format(i+band_init+1,
             S[i,i].real, S[i,i].imag, np.angle(S[i,i])/np.pi, np.abs(S[i,i])
             ))
+        if np.abs(S[i,i]) > 0.8: fudge_factor[i] = 1.0
     print('-'*80)
+
+    # Need check the overlap < + | S | - >
+    for m_band in range(nbands_calc):
+        m_ind = m_band + band_init
+        dump = wps_b[m_ind] / S[m_band, m_band]
+        print(np.dot(np.conj(wps_f[m_ind]), dump.T))
 
     # the C matrix for for the inelastic part of delta_Psi
     #             1    1     S[n,m]*     S[m,n]
@@ -142,6 +153,9 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
         psi_0_fd[m_band] = wps_f[m_ind] + wps_b[m_ind] / S[m_band, m_band]
     d_psi_P /= (2.0 * scale)
     psi_0_fd /= 2.0
+
+    return (d_psi_P, [], psi_0_fd, fudge_factor)
+
     raise SystemExit
 
     

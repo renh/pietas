@@ -42,7 +42,7 @@ sigma   :  0.25
 cutoff  :  1E-4
 
 # scale factor for finite-difference
-scale factor :  0.1
+scale factor :  1.0
 
 # Approximation method
 #  currently support Tersoff-Hamann approx.

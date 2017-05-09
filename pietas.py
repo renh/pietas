@@ -235,12 +235,22 @@ for ispin in range(param.get('nspin')):
         print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
 
         # ugly function here, encapsulate PAW related data into classes later.
-        dpsi_P, dpsi_I, psi_0_fd = finitediff.finite_difference(
+        dpsi_P, dpsi_I, psi_0_fd, fudge_factor = finitediff.finite_difference(
                 psi_b, psi_f, 
                 Pij_b[:,:,ik,ispin], Pij_f[:,:,ik,ispin], 
                 Qij_b[:,:,:,ispin], LMMax_b, 
                 bands_contrib, param
                 )
+        print('finite difference finished')
+        
+        # test TH calc/output for IETS
+        eig = (psi_b.getEig() + psi_f.getEig()) / 2.0
+        band_init, band_final = bands_contrib.get('bands_range')
+        gw_fd = helper.Gaussian(eig[band_init:band_final+1], EFermi, param.get('sigma'))
+        rho_0 = th.calc_LDOS(psi_0_fd, gw_fd, fudge_factor, index,param)
+        drho_P = th.calc_LDOS(dpsi_P, gw_fd, fudge_factor, index, param)
+        np.save('{}/rho_0.npy'.format(opath),rho_0)
+        np.save('{}/drho_P.npy'.format(opath), drho_P)
 
         raise SystemExit
 
@@ -263,8 +273,6 @@ for ispin in range(param.get('nspin')):
 
 
     np.save('{}/rho_0_orig.tot.spin-{:1d}.npy'.format(opath, ispin), rho_0_orig_tot)
-    np.save('{}/rho_0_fd.tot.spin-{:1d}.npy'.format(opath, ispin),rho_0_fd_tot)
-    np.save('{}/drho.P.tot.spin-{:1d}.npy'.format(opath, ispin), drho_P_tot)
     np.save('{}/drho.I.tot.spin-{:1d}.npy'.format(opath, ispin), drho_I_tot)
 
 

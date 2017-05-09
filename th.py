@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import scipy.fftpack
 
-def calc_LDOS(psi, weights, index, param):
+def calc_LDOS(psi, weights, fudge_factor, index, param):
     """
     Calculate LDOS alike quantities from wavefunction psi and corresponding weight.
         \rho (r) = sum_{ib} < psi_{ib} |r >< r| psi_{ib} > * weight
@@ -29,7 +29,7 @@ def calc_LDOS(psi, weights, index, param):
             psi_i[ind] = C
         psi_i = scipy.fftpack.ifftn(psi_i)
         dump = np.conj(psi_i) * psi_i
-        rho += (np.real(dump) * weights[ibm])
+        rho += (np.real(dump) * weights[ibm] * fudge_factor[ibm])
 
     return rho
     
