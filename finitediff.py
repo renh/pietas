@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import numpy as np
 import helper
 from constant import PI
@@ -95,8 +96,14 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
                 AC[n_band, m_band] = np.conj(AC[m_band, n_band])
     print('\n  augmented charge calculated.')
     S = S_ps + AC
+    print('\n  Overlap diagonal elements, small abs implies bands crossing')
+    print('\n band\t    real\t\timag\t\t  phase/PI\t    abs'+'\n'+'-'*80)
     for i in range(nbands_calc):
-        print(S[i,i], np.abs(S[i,i]))
+        print('{:>4d}{:18.6E}{:18.6E}{:18.6f}{:15.6f}'.format(i+band_init+1,
+            S[i,i].real, S[i,i].imag, np.angle(S[i,i])/np.pi, np.abs(S[i,i])
+            ))
+    print('-'*80)
+
     raise SystemExit
 
     ## In practice, we first construct the inner product matrix between backward and forward
