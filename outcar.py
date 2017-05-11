@@ -220,9 +220,9 @@ class OUTCAR:
         mode = np.array(mode)
         # now mode contains the imode-th eigenvector of the Hessian matrix
         # need to divide sqrt(mass) for each ion to get cartesian displacements
-        sqrt_m = np.sqrt(self.__IonMasses)
-        for ia in range(self.__NIons):
-            mode[ia] /= sqrt_m[ia]
+        #sqrt_m = np.sqrt(self.__IonMasses)
+        # for ia in range(self.__NIons):
+            # mode[ia] /= sqrt_m[ia]
 
 
         Mode = {}
