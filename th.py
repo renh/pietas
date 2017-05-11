@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import scipy.fftpack
 
-def calc_LDOS(psi, weights, fudge_factor, index, param):
+def calc_LDOS(psi, weights, index, param):
     """
     Calculate LDOS alike quantities from wavefunction psi and corresponding weight.
         \rho (r) = sum_{ib} < psi_{ib} |r >< r| psi_{ib} > * weight
@@ -29,7 +29,7 @@ def calc_LDOS(psi, weights, fudge_factor, index, param):
             psi_i[ind] = C
         psi_i = scipy.fftpack.ifftn(psi_i)
         dump = np.conj(psi_i) * psi_i
-        rho += (np.real(dump) * weights[ibm] * fudge_factor[ibm])
+        rho += (np.real(dump) * weights[ibm])
 
     return rho
     
@@ -39,15 +39,15 @@ def calc_LDOS(psi, weights, fudge_factor, index, param):
     
 
 
-def TersoffHamann(psi_fd, psi_0_orig, index, param):
+def TersoffHamann(psi_fd, index, param):
     """
     Calculate LDOS and change in LDOS using the Tersoff-Hamann approximation.
     
     Args:
         psi_fd : dictionary. 
             psi_0_fd :  wavefunction for un-disturbed geometry
-            dpsi_P   :  principal part of the change in wavefunction upon displacement
-            dpsi_I   :  inelastic part of the change in wavefunction upon displacement
+            d_psi_P  :  principal part of the change in wavefunction upon displacement
+            d_psi_I  :  inelastic part of the change in wavefunction upon displacement
             weights_fd: Gaussian weights for the contribution of specific band at Fermi level
         param : input configuration
     Returns:
@@ -63,25 +63,24 @@ def TersoffHamann(psi_fd, psi_0_orig, index, param):
         itaI   : inelastic IETS efficiency
         itaT   : total IETS efficiency
     """
-    print('\nTersoff-Hamann calculation for LDOS...', end=' ')
+    print('\nTersoff-Hamann calculation for LDOS...')
 
     psi_0_fd = psi_fd['psi_0_fd']
-    dpsi_P = psi_fd['dpsi_P']
-    dpsi_I = psi_fd['dpsi_I']
+    d_psi_P = psi_fd['d_psi_P']
+    d_psi_I = psi_fd['d_psi_I']
     gw = psi_fd['weights_fd']
 
     q_out = param.get('output quantities')
     fmt_out = param.get('output formats')
 
-    rho_0_orig = calc_LDOS(psi_0_orig, gw, index, param)
-    rho_0_fd = calc_LDOS(psi_0_fd, gw, index, param)
-    drho_P = calc_LDOS(dpsi_P, gw, index, param)
-    drho_I = calc_LDOS(dpsi_I, gw, index, param)
+    rho_0 = calc_LDOS(psi_0_fd, gw, index, param)
+    drho_P = calc_LDOS(d_psi_P, gw, index, param)
+    drho_I = calc_LDOS(d_psi_I, gw, index, param)
 
-    print ("FNISHED.")
+    # print ("FNISHED.")
     rho_this = {}
-    rho_this['rho_0_orig'] = rho_0_orig
-    rho_this['rho_0_fd'] = rho_0_fd
+    rho_this['rho_0'] = rho_0
     rho_this['drho_P'] = drho_P
     rho_this['drho_I'] = drho_I
+    print('  TH finished.')
     return rho_this

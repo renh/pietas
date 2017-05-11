@@ -175,10 +175,9 @@ Pij_f = nmc_f.getProjCoeffs()
 
 # loop over spinors
 for ispin in range(param.get('nspin')):
-    rho_0_fd_tot = np.zeros(NGF)
+    rho_0_tot = np.zeros(NGF)
     drho_P_tot = np.zeros(NGF)
     drho_I_tot = np.zeros(NGF)
-    rho_0_orig_tot = np.zeros(NGF)
 
     #loop over kpts
     for ik in range(param.get('nkpts')):
@@ -235,7 +234,7 @@ for ispin in range(param.get('nspin')):
         print("\nFinite difference calculation for undisturbed and the change of wavefunctions")
 
         # ugly function here, encapsulate PAW related data into classes later.
-        dpsi_P, dpsi_I, psi_0_fd, fudge_factor = finitediff.finite_difference(
+        psi_fd = finitediff.finite_difference(
                 psi_b, psi_f, 
                 Pij_b[:,:,ik,ispin], Pij_f[:,:,ik,ispin], 
                 Qij_b[:,:,:,ispin], LMMax_b, 
@@ -243,36 +242,40 @@ for ispin in range(param.get('nspin')):
                 )
         print('finite difference finished')
         
-        # test TH calc/output for IETS
-        eig = (psi_b.getEig() + psi_f.getEig()) / 2.0
-        band_init, band_final = bands_contrib.get('bands_range')
-        gw_fd = helper.Gaussian(eig[band_init:band_final+1], EFermi, param.get('sigma'))
-        rho_0 = th.calc_LDOS(psi_0_fd, gw_fd, fudge_factor, index,param)
-        drho_P = th.calc_LDOS(dpsi_P, gw_fd, fudge_factor, index, param)
-        np.save('{}/rho_0.npy'.format(opath),rho_0)
-        np.save('{}/drho_P.npy'.format(opath), drho_P)
+        # #
+        # # test TH calc/output for IETS
+        # #
+        # #eig = (psi_b.getEig() + psi_f.getEig()) / 2.0
+        # band_init, band_final = bands_contrib.get('bands_range')
+        # gw_fd = helper.Gaussian(eig[band_init:band_final+1], EFermi, param.get('sigma'))
+        # rho_0 = th.calc_LDOS(psi_0_fd, gw_fd, fudge_factor, index,param)
+        # drho_P = th.calc_LDOS(dpsi_P, gw_fd, fudge_factor, index, param)
+        # np.save('{}/rho_0-k{}.npy'.format(opath,ik),rho_0)
+        # np.save('{}/drho_P-k{}.npy'.format(opath,ik), drho_P)
 
-        raise SystemExit
-
-
-        # get required psi_0 for LDOS calculation
-        psi_0_calc = psi_0.getWPS()[band_init : band_final+1]
+        # rho_0_tot += rho_0 * kweight[ik]
+        # drho_P_tot += drho_P * kweight[ik]
+        # #
+        # #
+        # # end test here
+        # #
+        # continue
 
         # IETS calculation
-        if method.startswith('T'):
-            th_results = th.TersoffHamann(psi_fd, psi_0_calc, index, param)
-            fileout.save_thdata(th_results, ispin, ik, param)
-            rho_0_orig_tot += th_results.get('rho_0_orig') * kweight[ik]
-            rho_0_fd_tot += th_results.get('rho_0_fd') * kweight[ik]
+        if method.upper().startswith('T'):
+            th_results = th.TersoffHamann(psi_fd, index, param)
+            #fileout.save_thdata(th_results, ispin, ik, param)
+            rho_0_tot += th_results.get('rho_0') * kweight[ik]
             drho_P_tot += th_results.get('drho_P') * kweight[ik]
             drho_I_tot += th_results.get('drho_I') * kweight[ik]
-        elif method.startswith('B'):
+        elif method.upper().startswith('B'):
             print('Get into Bardeen method for IETS...')
             print('  Not implemented yet, exit...')
-            #raise SystemExit
+            raise SystemExit
 
 
-    np.save('{}/rho_0_orig.tot.spin-{:1d}.npy'.format(opath, ispin), rho_0_orig_tot)
+    np.save('{}/rho_0.tot.spin-{:1d}.npy'.format(opath, ispin), rho_0_tot)
+    np.save('{}/drho.P.tot.spin-{:1d}.npy'.format(opath, ispin), drho_P_tot)
     np.save('{}/drho.I.tot.spin-{:1d}.npy'.format(opath, ispin), drho_I_tot)
 
 
