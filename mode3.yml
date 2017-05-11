@@ -42,7 +42,7 @@ sigma   :  0.25
 cutoff  :  1E-4
 
 # scale factor for finite-difference
-scale factor :  1.0
+scale factor :  0.1
 
 # Approximation method
 #  currently support Tersoff-Hamann approx.
@@ -58,7 +58,7 @@ real grid density: 0.2
 #
 
 # output path
-output path : pietas_out_mode3
+output path : out_mode3-0.1
 
 # output quantities
 output quantities:
