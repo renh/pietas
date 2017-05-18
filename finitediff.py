@@ -115,11 +115,11 @@ def finite_difference(psi_b, psi_f, pij_b, pij_f, qij, LMMax, bands_contrib, par
         if np.abs(S[i,i]) > 0.8: fudge_factor[i] = 1.0
     print('-'*80)
 
-    # Need check the overlap < + | S | - >
-    for m_band in range(nbands_calc):
-        m_ind = m_band + band_init
-        dump = wps_b[m_ind] / S[m_band, m_band]
-        print(np.dot(np.conj(wps_f[m_ind]), dump.T))
+    # # Need check the overlap < + | S | - >
+    # for m_band in range(nbands_calc):
+        # m_ind = m_band + band_init
+        # dump = wps_b[m_ind] / S[m_band, m_band]
+        # print(np.dot(np.conj(wps_f[m_ind]), dump.T))
 
 
 
