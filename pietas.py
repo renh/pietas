@@ -265,6 +265,14 @@ for ispin in range(param.get('nspin')):
         if method.upper().startswith('T'):
             th_results = th.TersoffHamann(psi_fd, index, param)
             #fileout.save_thdata(th_results, ispin, ik, param)
+            np.save('{}/rho_0.k{}.spin{}.npy'.format(opath, ik, ispin),
+                    th_results.get('rho_0'))
+            np.save('{}/drho.P.k{}.spin{}.npy'.format(opath, ik, ispin),
+                    th_results.get('drho_P'))
+            np.save('{}/drho.I.k{}.spin{}.npy'.format(opath, ik, ispin),
+                    th_results.get('drho_I'))
+            
+            # sum over kpt
             rho_0_tot += th_results.get('rho_0') * kweight[ik]
             drho_P_tot += th_results.get('drho_P') * kweight[ik]
             drho_I_tot += th_results.get('drho_I') * kweight[ik]
