@@ -16,7 +16,7 @@ freq/OUTCAR
 # running data
 mode*/*.npy
 mode*/*.xsf
-
+out_mode*
 
 # scratch
 test.py

@@ -70,7 +70,7 @@ print('\nThere are in total {} vibrational modes in the calculation.'.format(
 # get equilibrium configuration
 IonsPerType = out.getIonsPerType()
 IonTypes = out.getIonTypes()
-ions = zip(IonTypes, IonsPerType)
+ions = list(zip(IonTypes, IonsPerType))
 NAtoms = out.getNIons()
 Masses = out.getIonMasses()
 #print(ions)
