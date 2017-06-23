@@ -299,7 +299,7 @@ class WAVECAR:
                     if etot < Ec:
                         GVEC.append([igx,igy,igz])
                             
-        return np.array(GVEC)
+        return np.array(GVEC, dtype=int)
 
     def gvectors(self, ikpt=0, gamma=False):
         '''
