@@ -65,7 +65,7 @@ def write_molden(fname, NormalModes):
         raise ValueError('Inconsistent length for normal modes with DOF')
 
     for imode in range(dof):
-        fh.write('vibration {}'.format(imode+1))
+        fh.write('vibration {}\n'.format(imode+1))
         modes[imode] /= AUTOA # Ang to Bohr
         for iion in range(NIons):
             fh.write('{:14.5f}{:14.5f}{:14.5f}\n'.format(
